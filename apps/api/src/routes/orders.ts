@@ -32,6 +32,21 @@ export class ValidationError extends Error {
   status = 400;
 }
 
+// ── Serviceable areas (any signed-in user — used by order forms) ───────────
+orderRoutes.get("/meta/areas", requireAuth(), async (c) => {
+  const rows = await db
+    .select({ area: areas, zoneName: zones.name })
+    .from(areas)
+    .innerJoin(zones, eq(areas.zoneId, zones.id))
+    .orderBy(areas.pincode);
+  return c.json({
+    areas: rows.map((r) => ({
+      id: r.area.id, name: r.area.name, pincode: r.area.pincode,
+      city: r.area.city, zoneId: r.area.zoneId, zoneName: r.zoneName,
+    })),
+  });
+});
+
 // ── Quote (charge preview before confirming) ────────────────────────────────
 orderRoutes.post("/quote", requireAuth("CUSTOMER", "ADMIN"), async (c) => {
   const body = parse(quoteSchema, await c.req.json());
