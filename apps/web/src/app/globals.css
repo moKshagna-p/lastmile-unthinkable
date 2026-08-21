@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+/*
+ * ── LASTMILE DESIGN SYSTEM ────────────────────────────────────────────────
+ * Direction: "logistics control tower" — industrial-utilitarian precision.
+ * Warm paper, ink black, one signal orange. Hairline rules, sharp corners,
+ * stamp chips, mono numerals, dashed route lines. No gradients, no glow.
+ */
+
+@theme {
+  --color-paper: #f6f4ee;
+  --color-paper-2: #efede4;
+  --color-ink: #17140e;
+  --color-ink-2: #4a463c;
+  --color-ink-3: #8a8577;
+  --color-line: #ddd8ca;
+  --color-line-2: #cbc5b2;
+  --color-signal: #e8500a;
+  --color-signal-deep: #b93d04;
+  --color-signal-wash: #fbe9de;
+  --color-go: #2f6b46;
+  --color-go-wash: #e3efe6;
+  --color-stop: #b3261e;
+  --color-stop-wash: #f7e3e1;
+  --color-hold: #8a6a00;
+  --color-hold-wash: #f4ecd2;
+
+  --font-display: var(--font-bricolage), "Arial Black", sans-serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --shadow-card: 0 1px 0 rgba(23, 20, 14, 0.06), 0 8px 24px -16px rgba(23, 20, 14, 0.35);
+}
+
+html {
+  background: var(--color-paper);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    radial-gradient(rgba(23, 20, 14, 0.05) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(var(--color-paper), var(--color-paper));
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: #fff;
+}
+
+/* ── Micro label: uppercase tracking tag used everywhere ─────────────────── */
+.micro {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* ── Stamp status chip ───────────────────────────────────────────────────── */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.stamp::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.stamp-signal { color: var(--color-signal); background: var(--color-signal-wash); }
+.stamp-go     { color: var(--color-go); background: var(--color-go-wash); }
+.stamp-stop   { color: var(--color-stop); background: var(--color-stop-wash); }
+.stamp-hold   { color: var(--color-hold); background: var(--color-hold-wash); }
+.stamp-ink    { color: var(--color-ink-2); background: var(--color-paper-2); }
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.card {
+  background: #fffdf8;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease;
+  user-select: none;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--color-signal);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.btn-primary:hover:not(:disabled) { background: var(--color-signal-deep); box-shadow: 2px 2px 0 var(--color-ink); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+.btn-outline:hover:not(:disabled) { background: var(--color-ink); color: var(--color-paper); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink-2);
+  border-color: var(--color-line-2);
+}
+.btn-ghost:hover:not(:disabled) { border-color: var(--color-ink); color: var(--color-ink); }
+
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
+.field {
+  width: 100%;
+  background: #fffdf8;
+  border: 1px solid var(--color-line-2);
+  border-radius: 3px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 100ms ease, box-shadow 100ms ease;
+}
+.field:focus {
+  border-color: var(--color-signal);
+  box-shadow: 0 0 0 3px rgba(232, 80, 10, 0.15);
+}
+.field::placeholder { color: var(--color-ink-3); }
+select.field { appearance: none; }
+
+.label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  margin-bottom: 6px;
+}
+
+/* ── Route line motif (pickup → drop) ────────────────────────────────────── */
+.route-dash {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-ink-3) 0 6px,
+    transparent 6px 12px
+  );
+  height: 1.5px;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1.5px solid var(--color-ink);
+  white-space: nowrap;
+}
+.tbl td { padding: 12px 14px; border-bottom: 1px solid var(--color-line); vertical-align: middle; }
+.tbl tr:hover td { background: rgba(232, 80, 10, 0.03); }
+
+/* ── Timeline ────────────────────────────────────────────────────────────── */
+.tl-item { position: relative; padding-left: 34px; padding-bottom: 26px; }
+.tl-item::before {
+  content: "";
+  position: absolute;
+  left: 9px; top: 22px; bottom: -2px;
+  width: 0;
+  border-left: 2px dashed var(--color-line-2);
+}
+.tl-item:last-child::before { display: none; }
+.tl-dot {
+  position: absolute;
+  left: 0; top: 2px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink);
+  background: #fffdf8;
+  display: flex; align-items: center; justify-content: center;
+}
+.tl-dot-done { background: var(--color-ink); }
+.tl-dot-fail { background: var(--color-stop); border-color: var(--color-stop); }
+
+/* ── Page-load reveal ────────────────────────────────────────────────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.rise-1 { animation-delay: 60ms; } .rise-2 { animation-delay: 130ms; }
+.rise-3 { animation-delay: 210ms; } .rise-4 { animation-delay: 300ms; }
+.rise-5 { animation-delay: 400ms; }
+
+@keyframes truck-run {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+
+/* Marquee strip on landing */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
