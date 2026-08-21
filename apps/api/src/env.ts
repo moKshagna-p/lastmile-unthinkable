@@ -9,11 +9,13 @@ export const env = {
   get databaseUrl() {
     return process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/lastmile";
   },
-  get jwtSecret() {
-    return process.env.JWT_SECRET ?? "dev-only-secret-change-me";
+  /** Better Auth signing secret — REQUIRED in production. */
+  get betterAuthSecret() {
+    return process.env.BETTER_AUTH_SECRET ?? "dev-only-secret-change-me";
   },
-  get jwtExpiresIn() {
-    return process.env.JWT_EXPIRES_IN ?? "7d";
+  /** Public base URL of this API — Better Auth issues cookies against it. */
+  get betterAuthUrl() {
+    return process.env.BETTER_AUTH_URL ?? `http://localhost:${process.env.API_PORT ?? 4000}`;
   },
   get webUrl() {
     return process.env.WEB_URL ?? "http://localhost:3000";

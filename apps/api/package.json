@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@lastmile/shared": "workspace:*",
+    "better-auth": "^1.7.1",
     "drizzle-orm": "^0.38.3",
     "hono": "^4.6.14",
     "jose": "^5.9.6",

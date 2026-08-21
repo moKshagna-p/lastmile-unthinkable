@@ -1,6 +1,7 @@
 import {
   boolean,
   doublePrecision,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -31,16 +32,77 @@ export const agentStatusEnum = pgEnum("agent_status", ["AVAILABLE", "OFFLINE"]);
 export const channelEnum = pgEnum("channel", ["EMAIL", "SMS"]);
 export const notifStatusEnum = pgEnum("notif_status", ["QUEUED", "SENT", "FAILED"]);
 
-// ── Users ───────────────────────────────────────────────────────────────────
+// ── Users (Better Auth "user" model + domain fields) ───────────────────────
+// Better Auth owns identity (id, credentials in `account`, sessions in
+// `session`). `phone` and `role` are domain additionalFields; role is only
+// settable server-side (admin agent creation), never from client sign-up.
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
   phone: text("phone").notNull(),
-  passwordHash: text("password_hash").notNull(),
   role: roleEnum("role").notNull().default("CUSTOMER"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ── Better Auth internals ───────────────────────────────────────────────────
+export const sessions = pgTable(
+  "session",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("session_user_id_idx").on(t.userId)],
+);
+
+export const accounts = pgTable(
+  "account",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    /** Provider URL for OAuth/OIDC credentials (unused for password auth). */
+    issuer: text("issuer"),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+    scope: text("scope"),
+    /** Hashed password — only populated for the credential provider. */
+    password: text("password"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("account_user_id_idx").on(t.userId)],
+);
+
+export const verifications = pgTable(
+  "verification",
+  {
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("verification_identifier_idx").on(t.identifier)],
+);
 
 // ── Zones & areas (pincode → zone mapping) ─────────────────────────────────
 export const zones = pgTable("zones", {
@@ -104,7 +166,7 @@ export const codSurcharges = pgTable(
 // ── Agents ──────────────────────────────────────────────────────────────────
 export const agents = pgTable("agents", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
     .unique()
     .references(() => users.id),
@@ -124,10 +186,10 @@ export const orders = pgTable("orders", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code").notNull().unique(),
 
-  customerId: uuid("customer_id")
+  customerId: text("customer_id")
     .notNull()
     .references(() => users.id),
-  createdByUserId: uuid("created_by_user_id")
+  createdByUserId: text("created_by_user_id")
     .notNull()
     .references(() => users.id),
 
@@ -198,7 +260,7 @@ export const trackingEvents = pgTable("tracking_events", {
     .references(() => orders.id),
   status: orderStatusEnum("status").notNull(),
   note: text("note"),
-  actorUserId: uuid("actor_user_id").references(() => users.id),
+  actorUserId: text("actor_user_id").references(() => users.id),
   actorRole: roleEnum("actor_role").notNull(),
   actorName: text("actor_name").notNull(),
   meta: jsonb("meta").$type<Record<string, unknown>>(),
@@ -209,7 +271,7 @@ export const trackingEvents = pgTable("tracking_events", {
 export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
   orderId: uuid("order_id").references(() => orders.id),
-  userId: uuid("user_id").references(() => users.id),
+  userId: text("user_id").references(() => users.id),
   channel: channelEnum("channel").notNull(),
   recipient: text("recipient").notNull(),
   subject: text("subject").notNull(),

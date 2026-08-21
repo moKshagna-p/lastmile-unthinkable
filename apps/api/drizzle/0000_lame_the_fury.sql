@@ -5,9 +5,26 @@ CREATE TYPE "public"."order_status" AS ENUM('PLACED', 'ASSIGNED', 'PICKED_UP', '
 CREATE TYPE "public"."order_type" AS ENUM('B2B', 'B2C');--> statement-breakpoint
 CREATE TYPE "public"."payment_type" AS ENUM('PREPAID', 'COD');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('CUSTOMER', 'AGENT', 'ADMIN');--> statement-breakpoint
+CREATE TABLE "account" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"account_id" text NOT NULL,
+	"provider_id" text NOT NULL,
+	"issuer" text,
+	"access_token" text,
+	"refresh_token" text,
+	"id_token" text,
+	"access_token_expires_at" timestamp with time zone,
+	"refresh_token_expires_at" timestamp with time zone,
+	"scope" text,
+	"password" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "agents" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
+	"user_id" text NOT NULL,
 	"code" text NOT NULL,
 	"vehicle" text,
 	"status" "agent_status" DEFAULT 'AVAILABLE' NOT NULL,
@@ -45,7 +62,7 @@ CREATE TABLE "cod_surcharges" (
 CREATE TABLE "notifications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"order_id" uuid,
-	"user_id" uuid,
+	"user_id" text,
 	"channel" "channel" NOT NULL,
 	"recipient" text NOT NULL,
 	"subject" text NOT NULL,
@@ -59,8 +76,8 @@ CREATE TABLE "notifications" (
 CREATE TABLE "orders" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"code" text NOT NULL,
-	"customer_id" uuid NOT NULL,
-	"created_by_user_id" uuid NOT NULL,
+	"customer_id" text NOT NULL,
+	"created_by_user_id" text NOT NULL,
 	"status" "order_status" DEFAULT 'PLACED' NOT NULL,
 	"pickup_contact_name" text NOT NULL,
 	"pickup_contact_phone" text NOT NULL,
@@ -108,12 +125,24 @@ CREATE TABLE "rate_cards" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "session" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"token" text NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL,
+	"ip_address" text,
+	"user_agent" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "session_token_unique" UNIQUE("token")
+);
+--> statement-breakpoint
 CREATE TABLE "tracking_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"order_id" uuid NOT NULL,
 	"status" "order_status" NOT NULL,
 	"note" text,
-	"actor_user_id" uuid,
+	"actor_user_id" text,
 	"actor_role" "role" NOT NULL,
 	"actor_name" text NOT NULL,
 	"meta" jsonb,
@@ -121,14 +150,25 @@ CREATE TABLE "tracking_events" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
+	"email_verified" boolean DEFAULT false NOT NULL,
+	"image" text,
 	"phone" text NOT NULL,
-	"password_hash" text NOT NULL,
 	"role" "role" DEFAULT 'CUSTOMER' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE "verification" (
+	"id" text PRIMARY KEY NOT NULL,
+	"identifier" text NOT NULL,
+	"value" text NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "zones" (
@@ -140,6 +180,7 @@ CREATE TABLE "zones" (
 	CONSTRAINT "zones_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
+ALTER TABLE "account" ADD CONSTRAINT "account_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "agents" ADD CONSTRAINT "agents_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "agents" ADD CONSTRAINT "agents_home_zone_id_zones_id_fk" FOREIGN KEY ("home_zone_id") REFERENCES "public"."zones"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "areas" ADD CONSTRAINT "areas_zone_id_zones_id_fk" FOREIGN KEY ("zone_id") REFERENCES "public"."zones"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -155,5 +196,9 @@ ALTER TABLE "orders" ADD CONSTRAINT "orders_drop_zone_id_zones_id_fk" FOREIGN KE
 ALTER TABLE "orders" ADD CONSTRAINT "orders_assigned_agent_id_agents_id_fk" FOREIGN KEY ("assigned_agent_id") REFERENCES "public"."agents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rate_cards" ADD CONSTRAINT "rate_cards_from_zone_id_zones_id_fk" FOREIGN KEY ("from_zone_id") REFERENCES "public"."zones"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rate_cards" ADD CONSTRAINT "rate_cards_to_zone_id_zones_id_fk" FOREIGN KEY ("to_zone_id") REFERENCES "public"."zones"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tracking_events" ADD CONSTRAINT "tracking_events_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "tracking_events" ADD CONSTRAINT "tracking_events_actor_user_id_users_id_fk" FOREIGN KEY ("actor_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "tracking_events" ADD CONSTRAINT "tracking_events_actor_user_id_users_id_fk" FOREIGN KEY ("actor_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "account_user_id_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "session_user_id_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");

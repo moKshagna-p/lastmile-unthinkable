@@ -13,7 +13,8 @@ import {
   users,
   zones,
 } from "../db/schema";
-import { currentUser, hashPassword, requireAuth } from "../lib/auth";
+import { APIError } from "better-auth/api";
+import { auth, currentUser, requireAuth } from "../lib/auth";
 import { applyStatusChange, assignAgentToOrder } from "../lib/orders";
 import { parse, ValidationError } from "./orders";
 import {
@@ -226,42 +227,47 @@ adminRoutes.get("/agents", async (c) => {
   });
 });
 
-/** Create an agent (user account + agent profile). */
+/** Create an agent (user account via Better Auth + agent profile). */
 adminRoutes.post("/agents", async (c) => {
   const raw = await c.req.json();
   const profile = parse(agentProfileSchema, raw);
   const account = parse(registerSchema, raw.account);
 
-  const [existing] = await db.select().from(users).where(eq(users.email, account.email.toLowerCase())).limit(1);
-  if (existing) return c.json({ error: "Email already registered" }, 409);
-
-  const result = await db.transaction(async (tx) => {
-    const [user] = await tx
-      .insert(users)
-      .values({
+  let userId: string;
+  try {
+    // Server-side credential sign-up; role is NOT settable by clients, so we
+    // grant AGENT in a follow-up write.
+    const res = await auth.api.signUpEmail({
+      body: {
+        email: account.email,
+        password: account.password,
         name: account.name,
-        email: account.email.toLowerCase(),
         phone: account.phone,
-        passwordHash: await hashPassword(account.password),
-        role: "AGENT",
-      })
-      .returning();
-    const [agent] = await tx
-      .insert(agents)
-      .values({
-        userId: user.id,
-        code: profile.code,
-        vehicle: profile.vehicle,
-        capacity: profile.capacity,
-        currentLat: profile.currentLat,
-        currentLng: profile.currentLng,
-        homeZoneId: profile.zoneId ?? null,
-      })
-      .returning();
-    return { user, agent };
-  });
+      },
+    });
+    userId = res.user.id;
+  } catch (e) {
+    if (e instanceof APIError) {
+      return c.json({ error: e.message || "Could not create agent account" }, 409);
+    }
+    throw e;
+  }
+  await db.update(users).set({ role: "AGENT" }).where(eq(users.id, userId));
 
-  return c.json({ agent: result.agent }, 201);
+  const [agent] = await db
+    .insert(agents)
+    .values({
+      userId,
+      code: profile.code,
+      vehicle: profile.vehicle,
+      capacity: profile.capacity,
+      currentLat: profile.currentLat,
+      currentLng: profile.currentLng,
+      homeZoneId: profile.zoneId ?? null,
+    })
+    .returning();
+
+  return c.json({ agent }, 201);
 });
 
 adminRoutes.patch("/agents/:id", async (c) => {

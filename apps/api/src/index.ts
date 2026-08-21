@@ -3,8 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "bun";
 import { env } from "./env";
-import { attachUser } from "./lib/auth";
-import { authRoutes } from "./routes/auth";
+import { attachUser, auth } from "./lib/auth";
 import { orderRoutes, ValidationError } from "./routes/orders";
 import { adminRoutes } from "./routes/admin";
 import { agentRoutes } from "./routes/agent";
@@ -26,7 +25,10 @@ app.use("*", attachUser);
 app.get("/", (c) => c.json({ name: "LastMile API", status: "ok", time: new Date().toISOString() }));
 app.get("/health", (c) => c.json({ ok: true }));
 
-app.route("/auth", authRoutes);
+// Better Auth owns everything under /api/auth/* — sign-up/sign-in/sign-out,
+// session introspection (its default basePath). Cookies are httpOnly; CORS
+// credentials stay on.
+app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.route("/orders", orderRoutes);
 app.route("/admin", adminRoutes);
 app.route("/agent", agentRoutes);

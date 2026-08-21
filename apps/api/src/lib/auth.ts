@@ -1,11 +1,50 @@
-import { SignJWT, jwtVerify } from "jose";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import type { Context, Next } from "hono";
-import { getCookie } from "hono/cookie";
+import { db } from "../db";
+import { accounts, sessions, users, verifications } from "../db/schema";
 import { env } from "../env";
 import type { Role } from "@lastmile/shared";
 
-const secret = new TextEncoder().encode(env.jwtSecret);
-export const AUTH_COOKIE = "lm_token";
+/**
+ * Better Auth — owns identity, credentials (scrypt in `account`) and cookie
+ * sessions (`session` table). Mounted at /auth/* in src/index.ts.
+ *
+ * Domain fields on the user row:
+ *  • phone  — collected at sign-up (required)
+ *  • role   — CUSTOMER | AGENT | ADMIN; `input: false` so clients can never
+ *             self-assign it. AGENT/ADMIN are granted server-side only
+ *             (see routes/admin.ts agent creation).
+ */
+export const auth = betterAuth({
+  baseURL: env.betterAuthUrl,
+  secret: env.betterAuthSecret,
+  trustedOrigins: [env.webUrl, "http://localhost:3000", "http://localhost:3001"],
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: users,
+      session: sessions,
+      account: accounts,
+      verification: verifications,
+    },
+  }),
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+    autoSignIn: true,
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // refresh once a day
+  },
+  user: {
+    additionalFields: {
+      phone: { type: "string", required: true, input: true },
+      role: { type: "string", required: false, input: false, defaultValue: "CUSTOMER" },
+    },
+  },
+});
 
 export interface AuthUser {
   id: string;
@@ -14,39 +53,22 @@ export interface AuthUser {
   email: string;
 }
 
-export async function signToken(user: AuthUser): Promise<string> {
-  return new SignJWT({ ...user })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(env.jwtExpiresIn)
-    .sign(secret);
-}
-
-export async function verifyToken(token: string): Promise<AuthUser | null> {
-  try {
-    const { payload } = await jwtVerify(token, secret);
-    if (!payload.id || !payload.role) return null;
-    return { id: payload.id as string, role: payload.role as Role, name: payload.name as string, email: payload.email as string };
-  } catch {
-    return null;
-  }
-}
-
-function extractToken(c: Context): string | undefined {
-  const header = c.req.header("Authorization");
-  if (header?.startsWith("Bearer ")) return header.slice(7);
-  return getCookie(c, AUTH_COOKIE);
-}
-
-/** Resolves the current user (if any) onto the context. */
+/** Resolves the Better Auth session onto the Hono context (once per request). */
 export async function attachUser(c: Context, next: Next) {
-  const token = extractToken(c);
-  if (token) c.set("user", await verifyToken(token));
+  try {
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (session?.user) c.set("user", session.user);
+  } catch {
+    // No/invalid session — request proceeds unauthenticated.
+  }
   await next();
 }
 
 export function currentUser(c: Context): AuthUser | null {
-  return c.get("user") ?? null;
+  const u = c.get("user") as
+    | { id: string; role: Role; name: string; email: string }
+    | undefined;
+  return u ? { id: u.id, role: u.role, name: u.name, email: u.email } : null;
 }
 
 /** Requires a signed-in user; optionally restricted to specific roles. */
@@ -59,12 +81,4 @@ export function requireAuth(...roles: Role[]) {
     }
     await next();
   };
-}
-
-export function hashPassword(password: string): Promise<string> {
-  return Bun.password.hash(password, { algorithm: "argon2id" });
-}
-
-export function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return Bun.password.verify(password, hash);
 }
