@@ -37,30 +37,29 @@ app.route("/agent", agentRoutes);
 app.onError((err, c) => {
   if (err instanceof PricingError) return c.json({ error: err.message }, err.status as 422);
   if (err instanceof ValidationError) return c.json({ error: err.message }, 400);
+  if (err instanceof SyntaxError) return c.json({ error: "Invalid JSON body" }, 400);
   const anyErr = err as { status?: number; message?: string };
   if (anyErr.status && anyErr.message) return c.json({ error: anyErr.message }, anyErr.status as 500);
   console.error(err);
   return c.json({ error: "Internal server error" }, 500);
 });
 
-// Bind to the configured port; if it's taken (EADDRINUSE), hop upward until a
-// free one is found so a stray dev server never blocks development.
-const BASE_PORT = env.port;
-const MAX_PORT_HOPS = 10;
-
-let boundPort = BASE_PORT;
-for (let attempt = 0; ; attempt++) {
-  try {
-    serve({ port: boundPort, fetch: app.fetch });
-    break;
-  } catch (err) {
-    const e = err as { code?: string };
-    if (e?.code === "EADDRINUSE" && attempt < MAX_PORT_HOPS) {
-      console.warn(`⚠ Port ${boundPort} is in use — trying ${boundPort + 1}`);
-      boundPort += 1;
-      continue;
-    }
-    throw err;
+// Bind to the configured port. Fail fast if it's taken: the web app targets
+// this exact URL (localhost:4000), so silently hopping ports would leave the
+// frontend calling a dead endpoint. Kill the stale process instead.
+const port = env.port;
+try {
+  serve({ port, fetch: app.fetch });
+} catch (err) {
+  const e = err as { code?: string };
+  if (e?.code === "EADDRINUSE") {
+    console.error(
+      `\n✗ Port ${port} is already in use — a previous dev server is still running.\n` +
+        `  Find it:  lsof -nP -iTCP:${port} -sTCP:LISTEN\n` +
+        `  Kill it:  kill <PID>   (use kill -9 <PID> if it ignores SIGTERM)\n`,
+    );
+    process.exit(1);
   }
+  throw err;
 }
-console.log(`🚚 LastMile API listening on http://localhost:${boundPort}`);
+console.log(`🚚 LastMile API listening on http://localhost:${port}`);
