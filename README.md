@@ -32,7 +32,7 @@ bun run db:up
 # configure environment
 cp .env.example .env        # defaults work out of the box for local dev
 
-# create schema + append-only trigger, then seed demo data
+# create schema + append-only trigger, then seed the delivery network
 bun run db:migrate
 bun run db:seed
 ```
@@ -49,17 +49,13 @@ bun run dev:web
 
 Open **http://localhost:3000**.
 
-### Demo accounts (password `Password@123`)
+### Accounts
 
-| Role | Email |
-|---|---|
-| Admin | `admin@lastmile.dev` |
-| Customer | `customer@lastmile.dev` |
-| Agent | `vikram@lastmile.dev` |
+There are **no seeded logins**. Create a customer account via **Register**;
+admins can provision agent logins from the admin Agents page.
 
-The seed ships a Bengaluru network: 4 zones, 12 pincode-mapped areas, a full
-B2B/B2C rate matrix (intra + inter zone), COD surcharges, 4 agents and sample
-orders across every lifecycle stage.
+The seed ships only the network: 4 zones, 12 pincode-mapped areas, a full
+B2B/B2C rate matrix (intra + inter zone) and COD surcharges.
 
 ---
 
@@ -115,6 +111,6 @@ One-click options:
   `NEXT_PUBLIC_API_URL=https://<your-api-host>`.
 
 Manual targets: API runs anywhere Bun does (`bun run start` in `apps/api`,
-env: `DATABASE_URL`, `JWT_SECRET`, `WEB_URL`); DB is any Postgres 14+ — run
+env: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `WEB_URL`); DB is any Postgres 14+ — run
 `bun run db:migrate && bun run db:seed` once.
 

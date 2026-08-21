@@ -2,8 +2,8 @@
 
 Base URL: `http://localhost:4000`
 
-Auth: JWT via `Authorization: Bearer <token>` **or** the `lm_token` httpOnly
-cookie (set automatically by `/auth/login`). Roles: `CUSTOMER`, `AGENT`, `ADMIN`.
+Auth: Better Auth **cookie sessions** (httpOnly, issued by `/api/auth/*`).
+Roles: `CUSTOMER`, `AGENT`, `ADMIN`.
 
 Errors are uniform JSON: `{ "error": "message" }` with status
 `400` validation · `401` unauthenticated · `403` wrong role/ownership ·
@@ -12,14 +12,17 @@ Errors are uniform JSON: `{ "error": "message" }` with status
 
 ---
 
-## Auth
+## Auth (Better Auth — base path `/api/auth`)
 
 | Method | Path | Body | Notes |
 |---|---|---|---|
-| POST | `/auth/register` | `{name, email, phone, password}` | Creates a CUSTOMER; returns `{token, user}` |
-| POST | `/auth/login` | `{email, password}` | Returns `{token, user}` + sets cookie |
-| POST | `/auth/logout` | — | Clears cookie |
-| GET | `/auth/me` | — | Current session user |
+| POST | `/api/auth/sign-up/email` | `{name, email, phone, password}` | Creates a CUSTOMER + session cookie; returns `{token, user}` |
+| POST | `/api/auth/sign-in/email` | `{email, password}` | Sets session cookie; returns `{user}` |
+| POST | `/api/auth/sign-out` | — | Clears session |
+| GET | `/api/auth/get-session` | — | `{session, user}` or `null` |
+
+There are no seeded demo accounts. Register via the UI; admins create agent
+logins through `POST /admin/agents`.
 
 ## Orders
 
