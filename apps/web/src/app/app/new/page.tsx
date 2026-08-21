@@ -159,9 +159,9 @@ export default function NewOrder() {
       <div className="rise">
         <h1 className="font-display font-bold text-3xl tracking-tight">New shipment</h1>
         <ol className="flex flex-wrap gap-2 mt-3" aria-label="Progress">
-          <StepChip n="01" label="Route" done={routeDone} />
-          <StepChip n="02" label="Package & payment" done={packageDone} />
-          <StepChip n="03" label="Confirm" done={confirmDone} />
+          <StepChip n="01" label="Route" done={routeDone} target="step-route" />
+          <StepChip n="02" label="Package & payment" done={packageDone} target="step-package" />
+          <StepChip n="03" label="Confirm" done={confirmDone} target="step-confirm" />
         </ol>
       </div>
 
@@ -170,7 +170,7 @@ export default function NewOrder() {
           {submitErr && <ErrorNote error={submitErr} />}
 
           {/* ── 01 · Route ──────────────────────────────────────────────── */}
-          <section className="card p-6 rise rise-1">
+          <section id="step-route" className="card p-6 rise rise-1 scroll-mt-20">
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
                 <Micro>01 · Route</Micro>
@@ -244,7 +244,7 @@ export default function NewOrder() {
           </section>
 
           {/* ── 02 · Package & payment ──────────────────────────────────── */}
-          <section className="card p-6 rise rise-2">
+          <section id="step-package" className="card p-6 rise rise-2 scroll-mt-20">
             <Micro>02 · Package &amp; payment</Micro>
             <h2 className="font-display font-bold text-lg mt-1 mb-4">What are we shipping?</h2>
 
@@ -326,7 +326,7 @@ export default function NewOrder() {
         </div>
 
         {/* ── 03 · Live quote ─────────────────────────────────────────── */}
-        <aside className="lg:sticky lg:top-20 space-y-4 rise rise-3">
+        <aside id="step-confirm" className="lg:sticky lg:top-20 space-y-4 rise rise-3 scroll-mt-20">
           <div className="card p-6">
             <div className="flex items-center justify-between border-b border-dashed border-[var(--color-line-2)] pb-3">
               <Micro>03 · Live quote · rate engine</Micro>
@@ -408,19 +408,25 @@ export default function NewOrder() {
 
 /* ── Pieces ──────────────────────────────────────────────────────────────── */
 
-function StepChip({ n, label, done }: { n: string; label: string; done: boolean }) {
+function StepChip({ n, label, done, target }: { n: string; label: string; done: boolean; target: string }) {
   return (
-    <li
-      className={`inline-flex items-center gap-2 rounded-[3px] border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors ${
-        done
-          ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-          : "border-[var(--color-line-2)] text-[var(--color-ink-3)]"
-      }`}
-    >
-      <span>{n}</span>
-      <span className="opacity-50">·</span>
-      <span>{label}</span>
-      {done && <span aria-hidden>✓</span>}
+    <li>
+      <button
+        type="button"
+        onClick={() => document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        aria-label={`Jump to ${label}`}
+        title={`Jump to ${label}`}
+        className={`inline-flex items-center gap-2 rounded-[3px] border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors cursor-pointer ${
+          done
+            ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[var(--color-signal-deep)] hover:border-[var(--color-signal-deep)]"
+            : "border-[var(--color-line-2)] text-[var(--color-ink-3)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+        }`}
+      >
+        <span>{n}</span>
+        <span className="opacity-50">·</span>
+        <span>{label}</span>
+        {done && <span aria-hidden>✓</span>}
+      </button>
     </li>
   );
 }
