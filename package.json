@@ -1,6 +1,9 @@
 {
   "name": "lastmile-unthinkable",
   "private": true,
+  "engines": {
+    "bun": ">=1.4.0 <1.5"
+  },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "bun run --filter='*' dev",

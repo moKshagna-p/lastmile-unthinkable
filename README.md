@@ -17,7 +17,8 @@ Built as a TypeScript monorepo on **Bun**:
 ## Quick start
 
 ### 1. Prerequisites
-- [Bun](https://bun.sh) ≥ 1.1
+- [Bun](https://bun.sh) **1.4.x** — pinned via [.bun-version](.bun-version) and
+  `engines` in package.json; CI and the Docker image use the same version
 - Docker (for Postgres) — or any PostgreSQL 14+ instance
 
 ### 2. Setup

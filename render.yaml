@@ -8,10 +8,9 @@
 services:
   - type: web
     name: lastmile-api
-    runtime: bun
-    rootDir: apps/api
-    buildCommand: bun install --frozen-lockfile
-    startCommand: bun run src/db/migrate.ts && bun run src/index.ts
+    runtime: docker
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     plan: free
     envVars:

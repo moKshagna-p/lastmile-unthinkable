@@ -1,7 +1,7 @@
 # Production image for the LastMile API (Bun + Hono).
 # Build from the repo root so workspace deps resolve:
 #   docker build -f apps/api/Dockerfile -t lastmile-api .
-FROM oven/bun:1 AS base
+FROM oven/bun:1.4.0 AS base
 WORKDIR /app
 
 # Install workspace dependencies first (layer-cached)
