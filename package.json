@@ -10,6 +10,7 @@
     "db:migrate": "bun run --filter='@lastmile/api' migrate",
     "db:seed": "bun run --filter='@lastmile/api' seed",
     "build": "bun run --filter='*' build",
+    "test": "bun test",
     "typecheck": "bun run --filter='*' typecheck"
   }
 }
