@@ -41,5 +41,24 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-serve({ port: env.port, fetch: app.fetch });
-console.log(`🚚 LastMile API listening on http://localhost:${env.port}`);
+// Bind to the configured port; if it's taken (EADDRINUSE), hop upward until a
+// free one is found so a stray dev server never blocks development.
+const BASE_PORT = env.port;
+const MAX_PORT_HOPS = 10;
+
+let boundPort = BASE_PORT;
+for (let attempt = 0; ; attempt++) {
+  try {
+    serve({ port: boundPort, fetch: app.fetch });
+    break;
+  } catch (err) {
+    const e = err as { code?: string };
+    if (e?.code === "EADDRINUSE" && attempt < MAX_PORT_HOPS) {
+      console.warn(`⚠ Port ${boundPort} is in use — trying ${boundPort + 1}`);
+      boundPort += 1;
+      continue;
+    }
+    throw err;
+  }
+}
+console.log(`🚚 LastMile API listening on http://localhost:${boundPort}`);
