@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { clearSession, getUser, type SessionUser } from "@/lib/api";
+import { authClient, type SessionUser } from "@/lib/auth-client";
 
 /** Authenticated shell: guards by role, renders top nav, logs out. */
 export function Shell({
@@ -16,20 +16,24 @@ export function Shell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const user = getUser();
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user as unknown as SessionUser | undefined;
 
   useEffect(() => {
-    if (!user) router.replace("/login");
-    else if (role !== "ANY" && user.role !== role) {
+    if (isPending) return;
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+    if (role !== "ANY" && user.role !== role) {
       router.replace(user.role === "ADMIN" ? "/admin" : user.role === "AGENT" ? "/agent" : "/app");
     }
-  }, [user, role, router]);
+  }, [isPending, user, role, router]);
 
-  if (!user) return null;
+  if (isPending || !user) return null;
 
-  function logout() {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/auth/logout`, { method: "POST" }).catch(() => {});
-    clearSession();
+  async function logout() {
+    await authClient.signOut();
     router.push("/login");
   }
 

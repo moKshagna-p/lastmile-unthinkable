@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, setSession, type SessionUser } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { ErrorNote, Field } from "@/components/ui";
 
 export default function Register() {
@@ -20,17 +20,20 @@ export default function Register() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    try {
-      const res = await api<{ token: string; user: SessionUser }>("/auth/register", {
-        method: "POST",
-        body: form,
-      });
-      setSession(res.token, res.user);
-      router.push("/app");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+    // `phone` is a required additional field server-side; the generic client
+    // types don't know it, so it rides along as an extra body property.
+    const { error } = await authClient.signUp.email({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      ...({ phone: form.phone } as object),
+    } as Parameters<typeof authClient.signUp.email>[0]);
+    if (error) {
+      setError(error.message ?? "Registration failed");
       setBusy(false);
+      return;
     }
+    router.push("/app");
   }
 
   return (

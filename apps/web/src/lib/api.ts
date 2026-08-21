@@ -1,43 +1,13 @@
 "use client";
 
 /**
- * API client — attaches JWT (localStorage) and forwards cookies.
- * The API sets an httpOnly cookie on login; the localStorage token is a
- * fallback for cross-origin deployments where SameSite may block cookies.
+ * API client — cookie-based sessions (Better Auth). Every request forwards
+ * credentials; a hard timeout keeps a dead API from hanging the UI forever.
  */
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-export interface SessionUser {
-  id: string;
-  name: string;
-  email: string;
-  role: "CUSTOMER" | "AGENT" | "ADMIN";
-}
-
-const TOKEN_KEY = "lm_token";
-const USER_KEY = "lm_user";
-
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(TOKEN_KEY);
-}
-
-export function getUser(): SessionUser | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(USER_KEY);
-  return raw ? (JSON.parse(raw) as SessionUser) : null;
-}
-
-export function setSession(token: string, user: SessionUser) {
-  window.localStorage.setItem(TOKEN_KEY, token);
-  window.localStorage.setItem(USER_KEY, JSON.stringify(user));
-}
-
-export function clearSession() {
-  window.localStorage.removeItem(TOKEN_KEY);
-  window.localStorage.removeItem(USER_KEY);
-}
+const REQUEST_TIMEOUT_MS = 15_000;
 
 export class ApiError extends Error {
   status: number;
@@ -52,16 +22,21 @@ export async function api<T = any>(
   path: string,
   opts: { method?: string; body?: unknown } = {},
 ): Promise<T> {
-  const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    method: opts.method ?? "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-    credentials: "include",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: opts.method ?? "GET",
+      headers: { "Content-Type": "application/json" },
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      credentials: "include",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch {
+    throw new ApiError(
+      `Cannot reach the API at ${API_URL} — is it running?`,
+      0,
+    );
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new ApiError(data.error ?? `Request failed (${res.status})`, res.status);
   return data as T;

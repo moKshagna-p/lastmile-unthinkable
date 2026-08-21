@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, setSession, type SessionUser } from "@/lib/api";
+import { authClient, type SessionUser } from "@/lib/auth-client";
 import { ErrorNote, Field } from "@/components/ui";
 
 export default function Login() {
@@ -17,17 +17,14 @@ export default function Login() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    try {
-      const res = await api<{ token: string; user: SessionUser }>("/auth/login", {
-        method: "POST",
-        body: { email, password },
-      });
-      setSession(res.token, res.user);
-      router.push(res.user.role === "ADMIN" ? "/admin" : res.user.role === "AGENT" ? "/agent" : "/app");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+    const { data, error } = await authClient.signIn.email({ email, password });
+    if (error) {
+      setError(error.message ?? "Login failed");
       setBusy(false);
+      return;
     }
+    const user = data.user as unknown as SessionUser;
+    router.push(user.role === "ADMIN" ? "/admin" : user.role === "AGENT" ? "/agent" : "/app");
   }
 
   return (
@@ -59,7 +56,6 @@ export default function Login() {
             </Link>
           </p>
         </form>
-        <p className="micro text-center mt-5">demo · admin@lastmile.dev / Password@123</p>
       </div>
     </main>
   );
