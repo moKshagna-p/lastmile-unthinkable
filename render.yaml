@@ -1,0 +1,57 @@
+# Render.com blueprint — deploys the whole stack.
+# 1. Push this repo to GitHub
+# 2. Render → New → Blueprint → select the repo
+#
+# For the database you can also use a managed Postgres (Neon/Supabase):
+# replace webService envVars DATABASE_URL accordingly and delete the db service.
+
+services:
+  - type: web
+    name: lastmile-api
+    runtime: bun
+    rootDir: apps/api
+    buildCommand: bun install --frozen-lockfile
+    startCommand: bun run src/db/migrate.ts && bun run src/index.ts
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lastmile-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: WEB_URL
+        value: https://lastmile-web.onrender.com
+      - key: API_PORT
+        value: "4000"
+      # Optional providers — leave blank for console fallback
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+
+  - type: web
+    name: lastmile-web
+    runtime: node
+    rootDir: apps/web
+    buildCommand: |
+      cd ../.. && corepack enable && npm install -g bun@1 --no-fund --no-audit || true
+      bun install --frozen-lockfile
+      cd apps/web && npx next build
+    startCommand: npx next start -p $PORT
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://lastmile-api.onrender.com
+
+databases:
+  - name: lastmile-db
+    plan: free
+    databaseName: lastmile

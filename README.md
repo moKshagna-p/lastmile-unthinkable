@@ -95,9 +95,25 @@ keys are optional (console fallback).
 - [System design write-up](docs/SYSTEM_DESIGN.md) — rate engine, zone detection,
   auto-assignment, failed-delivery handling
 
+## Tests
+
+```bash
+bun test        # state machine, rate math (volumetric/billable slabs), geo distance
+bun run typecheck
+```
+
 ## Deployment notes
 
-- **Web** → Vercel (`apps/web`, set `NEXT_PUBLIC_API_URL`).
-- **API** → Render/Railway/Fly (`bun run start` in `apps/api`, set `DATABASE_URL`,
-  `JWT_SECRET`, `WEB_URL`).
-- **DB** → Neon/Supabase/Railway Postgres; run `bun run db:migrate && bun run db:seed`.
+One-click options:
+
+- **Render** — this repo ships a [`render.yaml`](render.yaml) blueprint
+  (API + web + free Postgres). Render → New → Blueprint → pick the repo. Done.
+- **Docker** — `docker build -f apps/api/Dockerfile -t lastmile-api .`
+  (migrations run on boot).
+- **Vercel** — import the repo, set root directory to `apps/web`, env
+  `NEXT_PUBLIC_API_URL=https://<your-api-host>`.
+
+Manual targets: API runs anywhere Bun does (`bun run start` in `apps/api`,
+env: `DATABASE_URL`, `JWT_SECRET`, `WEB_URL`); DB is any Postgres 14+ — run
+`bun run db:migrate && bun run db:seed` once.
+
