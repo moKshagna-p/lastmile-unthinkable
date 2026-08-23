@@ -33,7 +33,12 @@ export function Shell({
   if (isPending || !user) return null;
 
   async function logout() {
-    await authClient.signOut();
+    try {
+      await authClient.signOut();
+    } catch {
+      // API unreachable — proceed to /login regardless; the session guard
+      // in this component handles any stale cookie on next load.
+    }
     router.push("/login");
   }
 
