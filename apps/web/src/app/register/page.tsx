@@ -45,16 +45,20 @@ export default function Register() {
   }
 
   return (
-    <main className="min-h-screen grid place-items-center px-4">
-      <div className="w-full max-w-md rise">
-        <Link href="/" className="flex items-center gap-2.5 mb-8 justify-center">
-          <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-sm">L</span>
-          <span className="font-display font-bold tracking-tight text-lg">LastMile</span>
-        </Link>
-        <form onSubmit={submit} className="card p-7 relative overflow-hidden">
-          <span aria-hidden className="absolute top-0 left-0 right-0 h-[3px] bg-[var(--color-signal)]" />
-          <h1 className="font-display font-bold text-2xl tracking-tight">Create account</h1>
-          <p className="micro mt-1 mb-6">Customer registration</p>
+    <main className="auth-layout">
+      <section className="auth-brand">
+        <Link href="/" className="brand-wordmark">LAST<br />MILE</Link>
+        <div>
+          <p className="micro">Customer shipping</p>
+          <h1>Your next delivery<br />starts here.</h1>
+          <p>Set up one account to quote, book and follow every parcel.</p>
+        </div>
+        <span className="micro">Bengaluru / India</span>
+      </section>
+      <section className="auth-panel">
+        <form onSubmit={submit} className="auth-form">
+          <p className="micro">New customer</p>
+          <h2>Create account</h2>
           <div className="space-y-4">
             <Field label="Full name">
               <input className="field" required minLength={2} value={form.name} onChange={set("name")} placeholder="Riya Sharma" />
@@ -73,12 +77,12 @@ export default function Register() {
               {busy ? "Creating…" : "Create account"}
             </button>
           </div>
-          <p className="text-sm text-[var(--color-ink-2)] mt-5 text-center">
+          <p className="text-sm text-[var(--color-muted)] mt-5">
             Already registered?{" "}
-            <Link href="/login" className="text-[var(--color-signal)] font-medium hover:underline">Log in</Link>
+            <Link href="/login" className="font-medium underline underline-offset-4">Log in</Link>
           </p>
         </form>
-      </div>
+      </section>
     </main>
   );
 }

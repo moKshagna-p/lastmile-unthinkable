@@ -35,16 +35,20 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen grid place-items-center px-4">
-      <div className="w-full max-w-md rise">
-        <Link href="/" className="flex items-center gap-2.5 mb-8 justify-center">
-          <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-sm">L</span>
-          <span className="font-display font-bold tracking-tight text-lg">LastMile</span>
-        </Link>
-        <form onSubmit={submit} className="card p-7 relative overflow-hidden">
-          <span aria-hidden className="absolute top-0 left-0 right-0 h-[3px] bg-[var(--color-signal)]" />
-          <h1 className="font-display font-bold text-2xl tracking-tight">Log in</h1>
-          <p className="micro mt-1 mb-6">Customers · agents · admins</p>
+    <main className="auth-layout">
+      <section className="auth-brand">
+        <Link href="/" className="brand-wordmark">LAST<br />MILE</Link>
+        <div>
+          <p className="micro">One network / every handoff</p>
+          <h1>Pick up where<br />you left off.</h1>
+          <p>Customer, operations and rider access share one secure entry point.</p>
+        </div>
+        <span className="micro">Bengaluru / India</span>
+      </section>
+      <section className="auth-panel">
+        <form onSubmit={submit} className="auth-form">
+          <p className="micro">Account access</p>
+          <h2>Log in</h2>
           <div className="space-y-4">
             <Field label="Email">
               <input className="field" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.dev" />
@@ -57,14 +61,14 @@ export default function Login() {
               {busy ? "Checking…" : "Log in"}
             </button>
           </div>
-          <p className="text-sm text-[var(--color-ink-2)] mt-5 text-center">
+          <p className="text-sm text-[var(--color-muted)] mt-5">
             New here?{" "}
-            <Link href="/register" className="text-[var(--color-signal)] font-medium hover:underline">
+            <Link href="/register" className="font-medium underline underline-offset-4">
               Create a customer account
             </Link>
           </p>
-          <details className="mt-5 border-t border-dashed border-[var(--color-line-2)] pt-4">
-            <summary className="cursor-pointer select-none w-fit micro hover:text-[var(--color-ink)] transition-colors">
+          <details className="auth-demo">
+            <summary className="cursor-pointer select-none w-fit micro hover:text-[var(--color-ink)]">
               Demo accounts · password <span className="font-mono text-[var(--color-ink)]">Password@123</span>
             </summary>
             <div className="grid gap-2 mt-3 font-mono text-xs">
@@ -73,7 +77,7 @@ export default function Login() {
                 ["CUSTOMER", "customer@lastmile.dev"],
                 ["AGENT", "vikram@lastmile.dev"],
               ].map(([role, email]) => (
-                <div key={role} className="flex items-center justify-between border border-[var(--color-line)] rounded px-3 py-2 bg-[var(--color-paper-2)]">
+                <div key={role} className="flex items-center justify-between border-t border-[var(--color-rule)] px-1 py-2">
                   <span className="micro">{role}</span>
                   <span className="text-[var(--color-ink)]">{email}</span>
                 </div>
@@ -81,7 +85,7 @@ export default function Login() {
             </div>
           </details>
         </form>
-      </div>
+      </section>
     </main>
   );
 }

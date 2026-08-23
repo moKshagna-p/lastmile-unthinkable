@@ -81,35 +81,6 @@ export function EmptyState({
   );
 }
 
-/**
- * Decorative barcode — deterministic bar pattern derived from the input
- * string, so the same waybill always renders the same artifact.
- */
-export function Barcode({ value, className = "" }: { value: string; className?: string }) {
-  const bars = [...value].map((ch) => ch.charCodeAt(0));
-  let x = 0;
-  const rects = bars.flatMap((code) => {
-    const w = (code % 3) + 1; // 1–3 units wide
-    const gap = ((code >> 2) % 3) + 1.5;
-    const rect = { x, w };
-    x += w + gap;
-    return [rect];
-  });
-  return (
-    <svg
-      viewBox={`0 0 ${Math.max(x, 1)} 24`}
-      preserveAspectRatio="none"
-      className={className}
-      aria-hidden
-      role="presentation"
-    >
-      {rects.map((r, i) => (
-        <rect key={i} x={r.x} y={0} width={r.w} height={24} fill="currentColor" />
-      ))}
-    </svg>
-  );
-}
-
 /* ── Progress stepper: the lifecycle as a horizontal journey ─────────────── */
 
 const LIFECYCLE: OrderStatus[] = ["PLACED", "ASSIGNED", "PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED"];

@@ -15,17 +15,19 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="min-h-screen grid place-items-center px-4">
-      <div className="card p-8 max-w-md w-full text-center rise">
-        <p className="micro !text-[var(--color-stop)]">Exception · 500</p>
-        <h1 className="font-display font-bold text-2xl tracking-tight mt-2">Something broke in transit</h1>
-        <p className="text-sm text-[var(--color-ink-2)] mt-3 leading-relaxed">
+    <main className="state-page">
+      <div className="state-mark">500</div>
+      <div className="state-copy">
+        <a href="/" className="brand-wordmark">LASTMILE</a>
+        <p className="micro !text-[var(--color-stop)] mt-12">Application exception</p>
+        <h1>Something broke<br />in transit.</h1>
+        <p>
           An unexpected error occurred. The details are in the browser console.
         </p>
         {error.digest && (
           <p className="micro mt-3 font-mono normal-case tracking-normal">digest · {error.digest}</p>
         )}
-        <div className="flex justify-center gap-3 mt-6">
+        <div className="flex flex-wrap gap-3 mt-6">
           <button onClick={reset} className="btn btn-primary">Try again</button>
           <a href="/" className="btn btn-ghost">Back home</a>
         </div>

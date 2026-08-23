@@ -57,29 +57,38 @@ export function Shell({
   const home = user.role === "ADMIN" ? "/admin" : user.role === "AGENT" ? "/agent" : "/app";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-[var(--color-line)] bg-[#fffdf8]/90 backdrop-blur sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          <Link href={home} className="flex items-center gap-2 shrink-0">
-            <span className="w-6 h-6 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-xs">L</span>
-            <span className="font-display font-bold tracking-tight">{title}</span>
-          </Link>
-          <nav className="flex items-center gap-1 min-w-0">
+    <div className="app-shell" data-role={user.role.toLowerCase()}>
+      <aside className="shell-rail">
+        <Link href={home} className="brand-wordmark">LAST<br />MILE</Link>
+        <div>
+          <p className="micro mb-4">{title}</p>
+          <nav className="shell-rail-nav" aria-label="Primary navigation">
             <NavLinks role={user.role} pathname={pathname} />
-            <div className="hidden sm:block h-5 w-px bg-[var(--color-line-2)] mx-2" />
-            <span className="micro hidden md:inline truncate max-w-40">{user.name}</span>
-            <span className="stamp stamp-ink hidden lg:inline-flex">{user.role}</span>
-            <button onClick={logout} className="btn btn-ghost btn-sm ml-1">Logout</button>
           </nav>
         </div>
-      </header>
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">{children}</main>
-      <footer className="border-t border-[var(--color-line)]">
-        <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between">
-          <span className="micro">LastMile operations</span>
-          <span className="micro">{user.role} session</span>
+        <div className="shell-rail-user">
+          <span className="micro">{user.name}<br />{user.role}</span>
+          <button onClick={logout} className="btn btn-ghost btn-sm">Logout</button>
         </div>
-      </footer>
+      </aside>
+
+      <div className="shell-stage">
+        <header className="shell-top">
+          <Link href={home} className="brand-wordmark">LASTMILE</Link>
+          <nav className="shell-top-nav" aria-label="Primary navigation">
+            <NavLinks role={user.role} pathname={pathname} />
+          </nav>
+          <div className="shell-account">
+            <span className="micro hidden sm:inline">{user.name}</span>
+            <button onClick={logout} className="btn btn-ghost btn-sm">Logout</button>
+          </div>
+        </header>
+        <main className="shell-content">{children}</main>
+        <footer className="shell-footer">
+          <span>LASTMILE / OPERATIONS</span>
+          <span>{user.role} SESSION</span>
+        </footer>
+      </div>
     </div>
   );
 }
@@ -108,10 +117,10 @@ function NavLinks({ role, pathname }: { role: string; pathname: string }) {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`flex items-center gap-1.5 font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
+            className={`shell-nav-link ${
               active
-                ? "bg-[var(--color-ink)] text-[var(--color-paper)]"
-                : "text-[var(--color-ink-2)] hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]"
+                ? "shell-nav-link-active"
+                : ""
             }`}
           >
             <Icon size={13} strokeWidth={active ? 2.2 : 1.75} />
