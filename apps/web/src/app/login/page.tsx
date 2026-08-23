@@ -17,14 +17,21 @@ export default function Login() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { data, error } = await authClient.signIn.email({ email, password });
-    if (error) {
-      setError(error.message ?? "Login failed");
+    try {
+      const { data, error } = await authClient.signIn.email({ email, password });
+      if (error) {
+        setError(error.message ?? "Login failed");
+        setBusy(false);
+        return;
+      }
+      const user = data.user as unknown as SessionUser;
+      router.push(user.role === "ADMIN" ? "/admin" : user.role === "AGENT" ? "/agent" : "/app");
+    } catch {
+      // Network-level failure (API down/unreachable): better-auth rejects
+      // instead of resolving { error }; catch so the page doesn't crash.
+      setError("Can't reach the server — start the API (bun --hot src/index.ts in apps/api)");
       setBusy(false);
-      return;
     }
-    const user = data.user as unknown as SessionUser;
-    router.push(user.role === "ADMIN" ? "/admin" : user.role === "AGENT" ? "/agent" : "/app");
   }
 
   return (
