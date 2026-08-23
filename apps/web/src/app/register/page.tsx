@@ -22,14 +22,22 @@ export default function Register() {
     setError(null);
     // `phone` is a required additional field server-side; the generic client
     // types don't know it, so it rides along as an extra body property.
-    const { error } = await authClient.signUp.email({
-      name: form.name,
-      email: form.email,
-      password: form.password,
-      ...({ phone: form.phone } as object),
-    } as Parameters<typeof authClient.signUp.email>[0]);
-    if (error) {
-      setError(error.message ?? "Registration failed");
+    try {
+      const { error } = await authClient.signUp.email({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        ...({ phone: form.phone } as object),
+      } as Parameters<typeof authClient.signUp.email>[0]);
+      if (error) {
+        setError(error.message ?? "Registration failed");
+        setBusy(false);
+        return;
+      }
+    } catch {
+      // Network-level failure (API down/unreachable): better-auth rejects
+      // instead of resolving { error }; catch so the page doesn't crash.
+      setError("Can't reach the server — start the API (bun --hot src/index.ts in apps/api)");
       setBusy(false);
       return;
     }
