@@ -1,0 +1,15 @@
+# Dev process dashboard — `bun run dev`
+#
+# One TUI, two panes: API (:4000) + web (:3000). Keys:
+#   a new · r restart focused · s stop/start · k kill · q quit
+# Restarting the api pane re-runs the in-boot port cleanup (see
+# apps/api/src/scripts/free-port.ts), so stale :4000 listeners self-heal.
+
+procs:
+  api:
+    cwd: apps/api
+    cmd: ["bun", "--hot", "src/index.ts"]
+
+  web:
+    cwd: apps/web
+    cmd: ["bun", "run", "dev"]
