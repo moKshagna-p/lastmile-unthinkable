@@ -1,430 +1,283 @@
 @import "tailwindcss";
 
-/*
- * ── LASTMILE DESIGN SYSTEM ────────────────────────────────────────────────
- * Direction: "logistics control tower" — industrial-utilitarian precision.
- * Warm paper, ink black, one signal orange. Hairline rules, sharp corners,
- * stamp chips, mono numerals, dashed route lines. No gradients, no glow.
- */
-
+/* Precision Grid: one neutral field, one hard grid, one live signal. */
 @theme {
-  --color-paper: #f6f4ee;
-  --color-paper-2: #efede4;
-  --color-ink: #17140e;
-  --color-ink-2: #4a463c;
-  --color-ink-3: #8a8577;
-  --color-line: #ddd8ca;
-  --color-line-2: #cbc5b2;
-  --color-signal: #e8500a;
-  --color-signal-deep: #b93d04;
-  --color-signal-wash: #fbe9de;
-  --color-go: #2f6b46;
-  --color-go-wash: #e3efe6;
-  --color-stop: #b3261e;
-  --color-stop-wash: #f7e3e1;
-  --color-hold: #8a6a00;
-  --color-hold-wash: #f4ecd2;
+  --color-canvas: #f0f1ec;
+  --color-surface: #fafbf7;
+  --color-ink: #0a0b0a;
+  --color-muted: #626760;
+  --color-rule: #c7cbc3;
+  --color-signal: #38ff62;
+  --color-stop: #d64032;
+  --color-hold: #b57700;
+
+  /* Compatibility aliases while route markup is simplified. */
+  --color-paper: #f0f1ec;
+  --color-paper-2: #e5e7e1;
+  --color-ink-2: #626760;
+  --color-ink-3: #747a72;
+  --color-line: #c7cbc3;
+  --color-line-2: #b5bab2;
+  --color-signal-deep: #16c944;
+  --color-signal-wash: #d9ffe1;
+  --color-go: #15723b;
+  --color-go-wash: #ddf2e5;
+  --color-stop-wash: #f9e5e2;
+  --color-hold-wash: #f5ecd5;
 
   --font-display: var(--font-display-src), "Arial Black", sans-serif;
-  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
-
-  --shadow-card: 0 1px 0 rgba(23, 20, 14, 0.06), 0 8px 24px -16px rgba(23, 20, 14, 0.35);
+  --font-sans: var(--font-plex-sans), sans-serif;
+  --font-mono: var(--font-plex-mono), monospace;
 }
 
-html {
-  background: var(--color-paper);
-}
+html { background: var(--color-canvas); }
 
 body {
-  font-family: var(--font-sans);
+  min-height: 100vh;
   color: var(--color-ink);
-  background:
-    radial-gradient(rgba(23, 20, 14, 0.05) 1px, transparent 1px) 0 0 / 22px 22px,
-    linear-gradient(var(--color-paper), var(--color-paper));
+  background: var(--color-canvas);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-::selection {
-  background: var(--color-signal);
-  color: #fff;
-}
-
-/* ── Headings: balanced line breaks, no widowed last words ────────────────── */
+::selection { color: var(--color-ink); background: var(--color-signal); }
 h1, h2, h3, h4 { text-wrap: balance; }
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
-/* ── Focus ring: visible keyboard affordance in signal orange ─────────────── */
 :focus-visible {
-  outline: 2px solid var(--color-signal);
-  outline-offset: 2px;
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--color-signal);
 }
 
-/* ── Scrollbars: thin ink-toned rules instead of OS chrome ────────────────── */
-* { scrollbar-width: thin; scrollbar-color: var(--color-line-2) transparent; }
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--color-line-2);
-  border-radius: 999px;
-  border: 3px solid var(--color-paper);
-}
-::-webkit-scrollbar-thumb:hover { background: var(--color-ink-3); }
+* { scrollbar-width: thin; scrollbar-color: var(--color-rule) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--color-rule); }
 
-/* ── Micro label: uppercase tracking tag used everywhere ─────────────────── */
 .micro {
+  color: var(--color-muted);
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-ink-3);
+  font-size: 10px;
+  letter-spacing: 0.06em;
 }
 
-/* ── Stamp status chip ───────────────────────────────────────────────────── */
-.stamp {
+.brand-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+}
+
+.page-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-ink);
+}
+
+.page-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 0;
+}
+
+.surface-section {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-ink);
+  padding: 1.5rem;
+}
+
+.stat {
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+}
+
+.stat-value {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.stat-sub { margin-top: 0.35rem; color: var(--color-muted); font-size: 0.75rem; }
+
+.status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.45rem;
+  width: fit-content;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid currentColor;
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 4px 9px;
-  border: 1.5px solid currentColor;
-  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   line-height: 1;
+  text-transform: uppercase;
   white-space: nowrap;
 }
-.stamp::before {
+
+.status-moving::before {
   content: "";
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background: currentColor;
 }
-.stamp-signal { color: var(--color-signal); background: var(--color-signal-wash); }
-.stamp-go     { color: var(--color-go); background: var(--color-go-wash); }
-.stamp-stop   { color: var(--color-stop); background: var(--color-stop-wash); }
-.stamp-hold   { color: var(--color-hold); background: var(--color-hold-wash); }
-.stamp-ink    { color: var(--color-ink-2); background: var(--color-paper-2); }
 
-/* In-motion shipments get a breathing dot */
-.stamp-live::before { animation: pulse-dot 1.6s ease-in-out infinite; }
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.3; }
-}
+.stamp-signal { color: var(--color-ink); background: var(--color-signal); }
+.stamp-go { color: var(--color-go); background: var(--color-go-wash); }
+.stamp-stop { color: var(--color-stop); background: var(--color-stop-wash); }
+.stamp-hold { color: var(--color-hold); background: var(--color-hold-wash); }
+.stamp-ink { color: var(--color-ink); background: var(--color-paper-2); }
+.stamp { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.55rem; border: 1px solid currentColor; font: 600 9px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
 
-/* ── Card ────────────────────────────────────────────────────────────────── */
-.card {
-  background: #fffdf8;
-  border: 1px solid var(--color-line);
-  border-radius: 4px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), var(--shadow-card);
-}
-
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 10px 18px;
-  border-radius: 3px;
-  border: 1.5px solid transparent;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0;
   cursor: pointer;
-  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease, opacity 120ms ease;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, transform 80ms ease;
   user-select: none;
   white-space: nowrap;
 }
-.btn:active:not(:disabled) { transform: translateY(1px); box-shadow: none !important; }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 3px; }
 
-/* Compact variant — table rows, headers, tight stacks */
-.btn-sm {
-  padding: 5px 11px;
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  gap: 6px;
-}
-
-/* Oversized variant — field use on touch screens (agent scans) */
-.btn-lg {
-  padding: 14px 22px;
-  font-size: 13px;
-  border-radius: 4px;
-}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.btn-sm { min-height: 32px; padding: 0.45rem 0.7rem; font-size: 9px; }
+.btn-lg { min-height: 48px; padding: 0.85rem 1.2rem; font-size: 11px; }
 .btn-lg svg { width: 17px; height: 17px; }
 
-.btn-primary {
-  background: var(--color-signal);
-  color: #fff;
-  box-shadow: 3px 3px 0 var(--color-ink);
-}
-.btn-primary:hover:not(:disabled) { background: var(--color-signal-deep); box-shadow: 2px 2px 0 var(--color-ink); }
+.btn-primary, .btn-go { color: var(--color-ink); background: var(--color-signal); border-color: var(--color-signal); }
+.btn-primary:hover:not(:disabled), .btn-go:hover:not(:disabled) { background: var(--color-surface); border-color: var(--color-ink); }
+.btn-danger { color: var(--color-stop); background: transparent; border-color: var(--color-stop); }
+.btn-danger:hover:not(:disabled), .btn-danger-solid { color: white; background: var(--color-stop); border-color: var(--color-stop); }
+.btn-danger-solid:hover:not(:disabled) { color: var(--color-stop); background: transparent; }
+.btn-outline { color: var(--color-ink); background: transparent; border-color: var(--color-ink); }
+.btn-outline:hover:not(:disabled) { color: var(--color-canvas); background: var(--color-ink); }
+.btn-ghost { color: var(--color-muted); background: transparent; border-color: var(--color-rule); }
+.btn-ghost:hover:not(:disabled) { color: var(--color-ink); border-color: var(--color-ink); }
 
-/* Success action — delivered scans */
-.btn-go {
-  background: var(--color-go);
-  color: #fff;
-  box-shadow: 3px 3px 0 var(--color-ink);
-}
-.btn-go:hover:not(:disabled) { background: #24543a; box-shadow: 2px 2px 0 var(--color-ink); }
-
-/* Destructive action — failure reports, deletions */
-.btn-danger {
-  background: transparent;
-  color: var(--color-stop);
-  border-color: var(--color-stop);
-}
-.btn-danger:hover:not(:disabled) { background: var(--color-stop); color: #fff; }
-.btn-danger-solid {
-  background: var(--color-stop);
-  color: #fff;
-  box-shadow: 3px 3px 0 var(--color-ink);
-}
-.btn-danger-solid:hover:not(:disabled) { background: #8f1d17; box-shadow: 2px 2px 0 var(--color-ink); }
-
-.btn-outline {
-  background: transparent;
-  color: var(--color-ink);
-  border-color: var(--color-ink);
-}
-.btn-outline:hover:not(:disabled) { background: var(--color-ink); color: var(--color-paper); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--color-ink-2);
-  border-color: var(--color-line-2);
-}
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-paper-2);
-  border-color: var(--color-ink);
-  color: var(--color-ink);
-}
-
-/* ── Inputs ──────────────────────────────────────────────────────────────── */
 .field {
   width: 100%;
-  background: #fffdf8;
-  border: 1px solid var(--color-line-2);
-  border-radius: 3px;
-  padding: 9px 12px;
-  font-size: 14px;
+  min-height: 44px;
+  padding: 0.7rem 0.8rem;
   color: var(--color-ink);
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 0;
   outline: none;
-  transition: border-color 100ms ease, box-shadow 100ms ease, background 100ms ease;
+  font-size: 14px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
 }
-.field:hover:not(:focus):not(:disabled) { border-color: var(--color-ink-3); }
-.field:focus {
-  border-color: var(--color-signal);
-  box-shadow: 0 0 0 3px rgba(232, 80, 10, 0.15);
-}
-.field::placeholder { color: var(--color-ink-3); }
-.field:disabled { background: var(--color-paper-2); cursor: not-allowed; }
-select.field { appearance: none; }
-select.field {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%234a463c' stroke-width='1.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
-}
+
+.field:hover:not(:focus):not(:disabled) { border-color: var(--color-muted); }
+.field:focus { border-color: var(--color-ink); box-shadow: inset 4px 0 0 var(--color-signal); }
+.field::placeholder { color: #8b9089; }
+.field:disabled { cursor: not-allowed; background: var(--color-paper-2); }
+select.field { appearance: auto; padding-right: 0.8rem; }
 
 .label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-ink-2);
-  margin-bottom: 6px;
-}
-
-/* ── Route line motif (pickup → drop) ────────────────────────────────────── */
-.route-dash {
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--color-ink-3) 0 6px,
-    transparent 6px 12px
-  );
-  height: 1.5px;
-}
-/* Live variant — dashes crawl toward the drop */
-.route-dash-live {
-  animation: dash-crawl 1.2s linear infinite;
-}
-@keyframes dash-crawl {
-  from { background-position-x: 0; }
-  to   { background-position-x: -12px; }
-}
-
-/* ── Table ───────────────────────────────────────────────────────────────── */
-.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.tbl th {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-ink-3);
-  text-align: left;
-  padding: 10px 14px;
-  border-bottom: 1.5px solid var(--color-ink);
-  white-space: nowrap;
-}
-.tbl td { padding: 12px 14px; border-bottom: 1px solid var(--color-line); vertical-align: middle; font-variant-numeric: tabular-nums; }
-.tbl tr:hover td { background: rgba(232, 80, 10, 0.03); }
-.tbl tr:last-child td { border-bottom: 0; }
-
-/* ── Timeline ────────────────────────────────────────────────────────────── */
-.tl-item { position: relative; padding-left: 34px; padding-bottom: 26px; }
-.tl-item::before {
-  content: "";
-  position: absolute;
-  left: 9px; top: 22px; bottom: -2px;
-  width: 0;
-  border-left: 2px dashed var(--color-line-2);
-}
-.tl-item:last-child::before { display: none; }
-.tl-dot {
-  position: absolute;
-  left: 0; top: 2px;
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--color-ink);
-  background: #fffdf8;
-  display: flex; align-items: center; justify-content: center;
-}
-.tl-dot-done { background: var(--color-ink); }
-.tl-dot-fail { background: var(--color-stop); border-color: var(--color-stop); }
-.tl-dot-signal { border-color: var(--color-signal); box-shadow: 0 0 0 3px rgba(232, 80, 10, 0.12); }
-.tl-dot-go { background: var(--color-go); border-color: var(--color-go); }
-
-/* ── Progress stepper (PLACED → DELIVERED) ───────────────────────────────── */
-.stepper { position: relative; display: flex; justify-content: space-between; }
-.stepper-rail,
-.stepper-fill {
-  position: absolute;
-  top: 13px;
-  height: 2px;
-  left: 20px;
-  right: 20px;
-}
-.stepper-rail { background: var(--color-line-2); }
-.stepper-fill { background: var(--color-signal); transition: width 400ms cubic-bezier(0.2, 0.7, 0.2, 1); max-width: calc(100% - 40px); }
-.step { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 0; }
-.step-dot {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  border: 2px solid var(--color-line-2);
-  background: #fffdf8;
-  display: grid; place-items: center;
+  margin-bottom: 0.45rem;
+  color: var(--color-muted);
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--color-ink-3);
-  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  letter-spacing: 0.04em;
 }
-.step-label {
+
+.error-note {
+  padding: 0.75rem 0.9rem;
+  color: var(--color-stop);
+  background: var(--color-stop-wash);
+  border: 1px solid var(--color-stop);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.empty-state { padding: 3rem 1.5rem; text-align: center; }
+.empty-state-icon { display: inline-grid; width: 42px; height: 42px; place-items: center; color: var(--color-ink); border: 1px solid var(--color-ink); }
+
+.route-dash { height: 1px; background: var(--color-ink); }
+
+.table-wrap { overflow-x: auto; background: var(--color-surface); border: 1px solid var(--color-rule); }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th {
+  padding: 0.7rem 0.85rem;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-ink);
   font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-align: left;
   text-transform: uppercase;
-  color: var(--color-ink-3);
   white-space: nowrap;
 }
-.step-done .step-dot { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
-.step-done .step-label { color: var(--color-ink-2); }
-.step-current .step-dot {
-  border-color: var(--color-signal);
-  color: var(--color-signal);
-  box-shadow: 0 0 0 4px rgba(232, 80, 10, 0.14);
-  animation: step-breathe 2s ease-in-out infinite;
-}
-.step-current .step-label { color: var(--color-signal); font-weight: 600; }
-@keyframes step-breathe {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(232, 80, 10, 0.14); }
-  50%      { box-shadow: 0 0 0 7px rgba(232, 80, 10, 0.07); }
-}
+.tbl td { padding: 0.85rem; border-bottom: 1px solid var(--color-rule); vertical-align: middle; font-variant-numeric: tabular-nums; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl tbody tr:hover { background: color-mix(in srgb, var(--color-signal) 9%, transparent); }
 
-/* ── Duty toggle (agent availability) ────────────────────────────────────── */
-.toggle {
-  position: relative;
-  width: 46px; height: 26px;
-  border-radius: 999px;
-  background: var(--color-line-2);
-  border: none;
-  cursor: pointer;
-  transition: background 150ms ease;
-  flex-shrink: 0;
-}
-.toggle::after {
-  content: "";
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: #fffdf8;
-  box-shadow: 0 1px 2px rgba(23, 20, 14, 0.3);
-  transition: transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.toggle-on { background: var(--color-go); }
-.toggle-on::after { transform: translateX(20px); }
-.toggle:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 2px; }
-.toggle:disabled { opacity: 0.45; cursor: not-allowed; }
+.tl-item { position: relative; padding: 0 0 1.6rem 2rem; }
+.tl-item::before { content: ""; position: absolute; top: 18px; bottom: 0; left: 8px; border-left: 1px solid var(--color-rule); }
+.tl-item:last-child::before { display: none; }
+.tl-dot { position: absolute; top: 2px; left: 0; display: grid; width: 17px; height: 17px; place-items: center; color: var(--color-surface); background: var(--color-surface); border: 1px solid var(--color-ink); border-radius: 50%; }
+.tl-dot-done { background: var(--color-ink); }
+.tl-dot-fail { background: var(--color-stop); border-color: var(--color-stop); }
+.tl-dot-signal { background: var(--color-signal); border-color: var(--color-ink); }
+.tl-dot-go { background: var(--color-go); border-color: var(--color-go); }
 
-/* ── Capacity / load bars (fleet + run sheet) ────────────────────────────── */
-.loadbar {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--color-paper-2);
-  overflow: hidden;
-}
-.loadbar > span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--color-go);
-  transition: width 300ms ease;
-}
+.stepper { position: relative; display: flex; justify-content: space-between; }
+.stepper-rail, .stepper-fill { position: absolute; top: 12px; left: 16px; height: 2px; }
+.stepper-rail { right: 16px; background: var(--color-rule); }
+.stepper-fill { background: var(--color-signal); transition: width 400ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+.step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 0.45rem; }
+.step-dot { display: grid; width: 25px; height: 25px; place-items: center; color: var(--color-muted); background: var(--color-surface); border: 1px solid var(--color-rule); border-radius: 50%; font: 10px var(--font-mono); }
+.step-label { color: var(--color-muted); font: 9px var(--font-mono); letter-spacing: 0.04em; white-space: nowrap; }
+.step-done .step-dot { color: var(--color-canvas); background: var(--color-ink); border-color: var(--color-ink); }
+.step-current .step-dot { color: var(--color-ink); background: var(--color-signal); border-color: var(--color-ink); }
+.step-current .step-label { color: var(--color-ink); font-weight: 600; }
+
+.toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; cursor: pointer; background: var(--color-rule); border: 1px solid var(--color-ink); border-radius: 99px; transition: background 140ms ease; }
+.toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: var(--color-surface); border-radius: 50%; transition: transform 140ms ease; }
+.toggle-on { background: var(--color-signal); }
+.toggle-on::after { transform: translateX(19px); background: var(--color-ink); }
+.toggle:disabled { cursor: not-allowed; opacity: 0.45; }
+
+.loadbar { height: 5px; overflow: hidden; background: var(--color-rule); }
+.loadbar > span { display: block; height: 100%; background: var(--color-signal); transition: width 300ms ease; }
 .loadbar-warn > span { background: var(--color-hold); }
 .loadbar-full > span { background: var(--color-stop); }
 
-/* ── Page-load reveal ────────────────────────────────────────────────────── */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; }
-}
-.rise { animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-.rise-1 { animation-delay: 60ms; } .rise-2 { animation-delay: 130ms; }
-.rise-3 { animation-delay: 210ms; } .rise-4 { animation-delay: 300ms; }
-.rise-5 { animation-delay: 400ms; }
-
-@keyframes truck-run {
-  from { offset-distance: 0%; }
-  to { offset-distance: 100%; }
+@media (max-width: 640px) {
+  .page-head { align-items: start; flex-direction: column; }
+  .step-label { font-size: 8px; }
 }
 
-/* Marquee strip on landing */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 28s linear infinite;
-}
-.marquee:hover .marquee-track { animation-play-state: paused; }
-
-/* ── Reduced motion: kill decorative movement, keep everything readable ───── */
 @media (prefers-reduced-motion: reduce) {
-  .rise,
-  .marquee-track,
-  .route-dash-live,
-  .stamp-live::before {
-    animation: none !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }

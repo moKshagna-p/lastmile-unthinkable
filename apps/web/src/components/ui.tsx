@@ -9,7 +9,7 @@ const LIVE_STATUSES: ReadonlySet<string> = new Set(["ASSIGNED", "PICKED_UP", "IN
 export function Stamp({ status }: { status: OrderStatus }) {
   const live = LIVE_STATUSES.has(status);
   return (
-    <span className={`${statusStamp(status)} ${live ? "stamp-live" : ""}`}>
+    <span className={`status ${statusStamp(status)} ${live ? "status-moving" : ""}`}>
       {STATUS_LABELS[status]}
     </span>
   );
@@ -33,7 +33,7 @@ export function Field({
 export function ErrorNote({ error }: { error: unknown }) {
   const msg = error instanceof Error ? error.message : String(error);
   return (
-    <div className="border border-[var(--color-stop)] bg-[var(--color-stop-wash)] text-[var(--color-stop)] rounded px-3 py-2 text-[13px]">
+    <div className="error-note" role="alert">
       {msg}
     </div>
   );
@@ -52,17 +52,15 @@ export function Stat({
   label, value, sub,
 }: { label: string; value: React.ReactNode; sub?: string }) {
   return (
-    <div className="card px-5 py-4 relative overflow-hidden">
-      {/* signal tick — a small drafting mark anchoring each figure */}
-      <span aria-hidden className="absolute left-0 top-0 h-full w-[3px] bg-[var(--color-signal)] opacity-70" />
+    <div className="stat">
       <Micro>{label}</Micro>
-      <div className="font-mono text-2xl font-semibold mt-1 tabular-nums">{value}</div>
-      {sub && <div className="text-xs text-[var(--color-ink-3)] mt-0.5">{sub}</div>}
+      <div className="stat-value">{value}</div>
+      {sub && <div className="stat-sub">{sub}</div>}
     </div>
   );
 }
 
-/** Shared empty state: dashed drop-zone motif with icon + copy + action. */
+/** Shared empty state with one explanation and one optional next action. */
 export function EmptyState({
   icon, title, body, action,
 }: {
@@ -72,12 +70,12 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="m-4 rounded border-2 border-dashed border-[var(--color-line-2)] px-6 py-12 text-center">
-      <span className="inline-grid place-items-center w-11 h-11 rounded-full border border-[var(--color-line-2)] bg-[var(--color-paper-2)] text-[var(--color-ink-3)]">
+    <div className="empty-state">
+      <span className="empty-state-icon">
         {icon}
       </span>
-      <p className="font-display font-bold text-lg mt-4">{title}</p>
-      <p className="text-sm text-[var(--color-ink-2)] mt-1 max-w-sm mx-auto leading-relaxed">{body}</p>
+      <p className="font-display text-lg mt-4">{title}</p>
+      <p className="text-sm text-[var(--color-muted)] mt-1 max-w-sm mx-auto leading-relaxed">{body}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -127,7 +125,7 @@ export function Stepper({ status }: { status: OrderStatus }) {
   // FAILED/CANCELLED render a dedicated state instead of the journey.
   if (status === "FAILED" || status === "CANCELLED") {
     return (
-      <div className={`stamp ${statusStamp(status)} w-fit`} role="status">
+      <div className={`status ${statusStamp(status)} w-fit`} role="status">
         {STATUS_LABELS[status]} — no further movement
       </div>
     );

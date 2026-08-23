@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Archivo_Black, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const archivoBlack = Archivo_Black({
   subsets: ["latin"],
   variable: "--font-display-src",
-  weight: ["500", "600", "700"],
+  weight: "400",
 });
 
 const plexSans = IBM_Plex_Sans({
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable}`}>
+      <body className={`${archivoBlack.variable} ${plexSans.variable} ${plexMono.variable}`}>
         {children}
       </body>
     </html>
