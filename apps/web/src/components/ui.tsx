@@ -111,3 +111,71 @@ export function Barcode({ value, className = "" }: { value: string; className?: 
     </svg>
   );
 }
+
+/* ── Progress stepper: the lifecycle as a horizontal journey ─────────────── */
+
+const LIFECYCLE: OrderStatus[] = ["PLACED", "ASSIGNED", "PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED"];
+
+/** Maps any status onto its position in the happy-path stepper. */
+function stepIndex(s: OrderStatus): number {
+  if (s === "RESCHEDULED") return 1; // waiting on reassignment
+  const i = LIFECYCLE.indexOf(s);
+  return i === -1 ? 0 : i;
+}
+
+export function Stepper({ status }: { status: OrderStatus }) {
+  // FAILED/CANCELLED render a dedicated state instead of the journey.
+  if (status === "FAILED" || status === "CANCELLED") {
+    return (
+      <div className={`stamp ${statusStamp(status)} w-fit`} role="status">
+        {STATUS_LABELS[status]} — no further movement
+      </div>
+    );
+  }
+
+  const cur = stepIndex(status);
+  const pct = (cur / (LIFECYCLE.length - 1)) * 100;
+
+  return (
+    <div className="stepper" role="list" aria-label="Delivery progress">
+      <span aria-hidden className="stepper-rail" />
+      <span aria-hidden className="stepper-fill" style={{ width: `${pct}%` }} />
+      {LIFECYCLE.map((s, i) => (
+        <div key={s} className={`step ${i < cur ? "step-done" : ""} ${i === cur ? "step-current" : ""}`} role="listitem" aria-current={i === cur ? "step" : undefined}>
+          <span className="step-dot">{i < cur ? "✓" : i + 1}</span>
+          <span className={`step-label ${i === cur || i === LIFECYCLE.length - 1 ? "" : "hidden sm:inline"}`}>
+            {STATUS_LABELS[s]}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Capacity bar — green under load, amber near full, red at capacity. */
+export function LoadBar({ used, capacity }: { used: number; capacity: number }) {
+  const pct = capacity > 0 ? Math.min(100, (used / capacity) * 100) : 0;
+  const cls = pct >= 100 ? "loadbar-full" : pct >= 75 ? "loadbar-warn" : "";
+  return (
+    <div className={`loadbar ${cls}`} role="img" aria-label={`${used} of ${capacity} capacity used`}>
+      <span style={{ width: `${Math.max(pct, 4)}%` }} />
+    </div>
+  );
+}
+
+/** Accessible duty switch for agent availability. */
+export function DutyToggle({
+  on, disabled, onClick,
+}: { on: boolean; disabled?: boolean; onClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={on ? "On duty — tap to go offline" : "Offline — tap to go on duty"}
+      className={`toggle ${on ? "toggle-on" : ""}`}
+      disabled={disabled}
+      onClick={onClick}
+    />
+  );
+}

@@ -41,7 +41,8 @@ export default function Login() {
           <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-sm">L</span>
           <span className="font-display font-bold tracking-tight text-lg">LastMile</span>
         </Link>
-        <form onSubmit={submit} className="card p-7">
+        <form onSubmit={submit} className="card p-7 relative overflow-hidden">
+          <span aria-hidden className="absolute top-0 left-0 right-0 h-[3px] bg-[var(--color-signal)]" />
           <h1 className="font-display font-bold text-2xl tracking-tight">Log in</h1>
           <p className="micro mt-1 mb-6">Customers · agents · admins</p>
           <div className="space-y-4">

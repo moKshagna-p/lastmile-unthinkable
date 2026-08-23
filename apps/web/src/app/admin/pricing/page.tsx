@@ -130,7 +130,7 @@ export default function PricingAdmin() {
           <Micro>Rate matrix · {shown.length} cards</Micro>
           <div className="flex gap-1">
             {(["ALL", "B2B", "B2C"] as const).map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className={`btn !py-1 !px-3 ${filter === f ? "btn-outline" : "btn-ghost"}`}>{f}</button>
+              <button key={f} onClick={() => setFilter(f)} className={`btn btn-sm ${filter === f ? "btn-outline" : "btn-ghost"}`}>{f}</button>
             ))}
           </div>
         </div>

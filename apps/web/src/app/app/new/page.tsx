@@ -204,7 +204,7 @@ export default function NewOrder() {
                 <Micro>01 · Route</Micro>
                 <h2 className="font-display font-bold text-lg mt-1">Pickup &amp; drop</h2>
               </div>
-              <button type="button" onClick={swapEnds} className="btn btn-ghost !py-1.5 !px-3" title="Swap pickup and drop">
+              <button type="button" onClick={swapEnds} className="btn btn-ghost btn-sm" title="Swap pickup and drop">
                 ⇄ Swap
               </button>
             </div>

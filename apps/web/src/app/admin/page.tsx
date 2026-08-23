@@ -103,7 +103,7 @@ export default function AdminOverview() {
                   <td className="font-mono tabular-nums">{fmtMoney(o.totalCharge)}</td>
                   <td><Stamp status={o.status} /></td>
                   <td className="whitespace-nowrap text-[var(--color-ink-2)]">{fmtDate(o.createdAt)}</td>
-                  <td><Link href={`/admin/orders/${o.id}`} className="btn btn-ghost !py-1.5 !px-3">Manage</Link></td>
+                  <td><Link href={`/admin/orders/${o.id}`} className="btn btn-ghost btn-sm">Manage</Link></td>
                 </tr>
               ))}
             </tbody>

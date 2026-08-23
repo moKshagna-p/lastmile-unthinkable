@@ -3,11 +3,11 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Shell } from "@/components/shell";
-import { EmptyState, ErrorNote, Micro, Spinner, Stamp, Stat } from "@/components/ui";
+import { DutyToggle, EmptyState, ErrorNote, LoadBar, Micro, Spinner, Stamp, Stat } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtMoney } from "@/lib/format";
 import type { OrderStatus } from "@lastmile/shared";
-import { MapPin, PackageSearch, PackageCheck, Truck, XCircle } from "lucide-react";
+import { MapPin, PackageSearch, PackageCheck, Phone, Truck, XCircle } from "lucide-react";
 
 interface AgentOrder {
   id: string; code: string; status: OrderStatus;
@@ -92,20 +92,32 @@ export default function AgentConsole() {
 
   return (
     <Shell role="AGENT" title="LastMile · Rider">
-      <div className="flex flex-wrap items-end justify-between gap-4 rise">
+      <div className="flex flex-wrap items-center justify-between gap-4 rise">
         <div>
           <h1 className="font-display font-bold text-3xl tracking-tight">Run sheet</h1>
           <p className="micro mt-1">{me ? `${me.name} · ${me.agent.code}` : "…"}</p>
         </div>
-        <button onClick={toggleDuty} disabled={!me || dutyBusy} className={`btn ${me?.agent.status === "AVAILABLE" ? "btn-outline" : "btn-primary"}`}>
-          {dutyBusy ? "Switching…" : me?.agent.status === "AVAILABLE" ? "Go offline" : "Go on duty"}
-        </button>
+        {/* Duty switch — glanceable state, one-tap flip */}
+        <div className="flex items-center gap-3 card px-4 py-2.5">
+          <div className="text-right">
+            <Micro>{me?.agent.status === "AVAILABLE" ? "On duty" : "Offline"}</Micro>
+            <p className="font-mono text-xs font-semibold mt-0.5">
+              {me?.agent.status === "AVAILABLE" ? "Receiving assignments" : "Not receiving assignments"}
+            </p>
+          </div>
+          <DutyToggle on={me?.agent.status === "AVAILABLE"} disabled={!me || dutyBusy} onClick={toggleDuty} />
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-3 gap-4 mt-6 rise rise-1">
         <Stat label="Active runs" value={orders.length} />
         <Stat label="COD to collect" value={fmtMoney(orders.reduce((s, o) => s + (o.paymentType === "COD" && !["DELIVERED"].includes(o.status) ? (o.codAmount ?? 0) : 0), 0))} />
-        <Stat label="Capacity used" value={me ? `${orders.length}/${me.agent.capacity}` : "—"} />
+        <div className="card px-5 py-4 relative overflow-hidden">
+          <span aria-hidden className="absolute left-0 top-0 h-full w-[3px] bg-[var(--color-signal)] opacity-70" />
+          <Micro>Capacity used</Micro>
+          <div className="font-mono text-2xl font-semibold mt-1 tabular-nums">{me ? `${orders.length}/${me.agent.capacity}` : "—"}</div>
+          {me && <div className="mt-2.5"><LoadBar used={orders.length} capacity={me.agent.capacity} /></div>}
+        </div>
       </div>
 
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
@@ -124,35 +136,56 @@ export default function AgentConsole() {
         ) : (
           orders.map((o) => {
             const actions = NEXT_ACTIONS[o.status] ?? [];
+            const isCod = o.paymentType === "COD" && !["DELIVERED", "FAILED"].includes(o.status);
             return (
               <article key={o.id} className="card p-5 rise">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-mono font-semibold">{o.code}</p>
-                    <Micro className="mt-0.5">{o.customerName}</Micro>
+                    <p className="font-mono font-semibold text-base">{o.code}</p>
+                    <Micro className="mt-0.5">{o.customerName} · sender {o.customerPhone}</Micro>
                   </div>
                   <Stamp status={o.status} />
                 </div>
 
-                <div className="grid sm:grid-cols-[1fr_auto] gap-4 mt-4 items-end">
-                  <div className="text-sm">
-                    <p className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 shrink-0 text-[var(--color-signal)]" />{o.dropLine1} — {o.dropContactName} · {o.dropContactPhone}</p>
-                    {o.paymentType === "COD" && (
-                      <p className="micro mt-2 !text-[var(--color-signal)]">Collect COD ₹{(o.codAmount ?? 0).toLocaleString("en-IN")} at the door</p>
-                    )}
+                {/* COD — the number that matters at the door */}
+                {isCod && (
+                  <div className="mt-4 border-2 border-dashed border-[var(--color-signal)] bg-[var(--color-signal-wash)] rounded-[3px] px-4 py-3 flex items-center justify-between gap-3">
+                    <span className="micro !text-[var(--color-signal-deep)]">Collect cash on delivery</span>
+                    <span className="font-mono font-bold text-xl text-[var(--color-signal-deep)] tabular-nums">
+                      ₹{(o.codAmount ?? 0).toLocaleString("en-IN")}
+                    </span>
                   </div>
-                  <div className="flex flex-wrap gap-2 justify-end">
-                    {actions.filter((a) => a.kind !== "fail").map((a) => (
-                      <button key={a.to} disabled={busy} onClick={() => scan(o.id, a.to)} className={`btn ${a.kind === "go" ? "btn-primary" : "btn-outline"}`}>
-                        {a.kind === "go" ? <PackageCheck size={14} /> : <Truck size={14} />} {a.label}
-                      </button>
-                    ))}
-                    {actions.some((a) => a.kind === "fail") && (
-                      <button disabled={busy} onClick={() => setFailFor(o.id)} className="btn btn-ghost !text-[var(--color-stop)] !border-[var(--color-stop)]">
-                        <XCircle size={14} /> Failed
-                      </button>
-                    )}
+                )}
+
+                <div className="mt-4 pt-4 border-t border-dashed border-[var(--color-line-2)]">
+                  <p className="text-[15px] leading-relaxed flex items-start gap-2 font-medium">
+                    <MapPin size={16} className="mt-1 shrink-0 text-[var(--color-signal)]" />
+                    {o.dropLine1}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-[var(--color-ink-2)]">
+                    <span>{o.dropContactName}</span>
+                    <a href={`tel:${o.dropContactPhone}`} className="flex items-center gap-1.5 font-mono text-[13px] text-[var(--color-go)] hover:text-[var(--color-ink)] hover:underline underline-offset-2 transition-colors">
+                      <Phone size={13} /> {o.dropContactPhone}
+                    </a>
                   </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2.5 mt-5">
+                  {actions.filter((a) => a.kind !== "fail").map((a) => (
+                    <button
+                      key={a.to}
+                      disabled={busy}
+                      onClick={() => scan(o.id, a.to)}
+                      className={`btn ${a.kind === "go" ? "btn-go" : "btn-outline"} btn-lg flex-1 sm:flex-none min-w-40`}
+                    >
+                      {a.kind === "go" ? <PackageCheck /> : <Truck />} {a.label}
+                    </button>
+                  ))}
+                  {actions.some((a) => a.kind === "fail") && (
+                    <button disabled={busy} onClick={() => setFailFor(o.id)} className="btn btn-danger btn-lg">
+                      <XCircle /> Report failure
+                    </button>
+                  )}
                 </div>
 
                 {failFor === o.id && (
@@ -164,7 +197,7 @@ export default function AgentConsole() {
                       <Micro>Failure reason (required)</Micro>
                       <input className="field mt-1.5" autoFocus value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Customer unavailable / address unreachable…" />
                     </div>
-                    <button type="submit" disabled={busy || !reason.trim()} className="btn btn-primary">Submit failure</button>
+                    <button type="submit" disabled={busy || !reason.trim()} className="btn btn-danger-solid">Submit failure</button>
                     <button type="button" onClick={() => setFailFor(null)} className="btn btn-ghost">Cancel</button>
                   </form>
                 )}

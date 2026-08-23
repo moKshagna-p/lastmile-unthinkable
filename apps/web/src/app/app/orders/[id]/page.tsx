@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { CalendarClock, Check, MapPin, Phone, Truck, X } from "lucide-react";
 import { Shell } from "@/components/shell";
-import { ErrorNote, Field, Micro, Spinner, Stamp } from "@/components/ui";
+import { ErrorNote, Field, Micro, Spinner, Stamp, Stepper } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtDate, fmtKg, fmtMoney, fmtTime, STATUS_LABELS } from "@/lib/format";
 import type { OrderStatus } from "@lastmile/shared";
@@ -83,8 +83,18 @@ export default function OrderTracking() {
         </div>
       </div>
 
-      {/* Route strip */}
+      {/* Lifecycle stepper — where is my parcel? */}
       <section className="card p-6 mt-6 rise rise-1">
+        <Stepper status={order.status} />
+        {order.status === "FAILED" && order.rescheduleFor && (
+          <p className="micro mt-4 text-center flex items-center justify-center gap-1.5">
+            <CalendarClock size={11} /> Retry scheduled for {fmtDate(order.rescheduleFor)}
+          </p>
+        )}
+      </section>
+
+      {/* Route strip */}
+      <section className="card p-6 mt-4 rise rise-1">
         <div className="grid md:grid-cols-[1fr_auto_1fr] gap-5 items-center">
           <div>
             <Micro>Pickup · {pickupArea?.pincode}</Micro>
@@ -126,7 +136,7 @@ export default function OrderTracking() {
               <Micro>Assigned rider</Micro>
               <p className="font-medium">{agent.name} · <span className="font-mono">{agent.code}</span></p>
             </div>
-            <a href={`tel:${agent.phone}`} className="btn btn-outline !py-1.5"><Phone size={13} /> Call</a>
+            <a href={`tel:${agent.phone}`} className="btn btn-outline btn-sm"><Phone size={13} /> Call</a>
           </div>
         )}
       </section>
@@ -185,11 +195,6 @@ export default function OrderTracking() {
             <span className="micro !text-[var(--color-signal)]">Total</span>
             <span className="font-mono font-semibold text-xl text-[var(--color-signal)] tabular-nums">{fmtMoney(order.totalCharge)}</span>
           </div>
-          {order.rescheduleFor && (
-            <p className="micro mt-4 flex items-center gap-1.5">
-              <CalendarClock size={11} /> Retry scheduled for {fmtDate(order.rescheduleFor)}
-            </p>
-          )}
         </section>
       </div>
 

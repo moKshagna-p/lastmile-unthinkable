@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Check, Radar, UserRound } from "lucide-react";
 import { Shell } from "@/components/shell";
-import { ErrorNote, Field, Micro, Spinner, Stamp } from "@/components/ui";
+import { ErrorNote, Field, Micro, Spinner, Stamp, Stepper } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtDate, fmtKg, fmtMoney, fmtTime, STATUS_LABELS } from "@/lib/format";
 import { canTransition, ORDER_STATUSES, type OrderStatus } from "@lastmile/shared";
@@ -61,6 +61,10 @@ export default function AdminOrder() {
         </div>
         <Stamp status={order.status} />
       </div>
+
+      <section className="card p-6 mt-6 rise rise-1">
+        <Stepper status={order.status} />
+      </section>
 
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
 
@@ -142,19 +146,32 @@ export default function AdminOrder() {
           <Micro>Tracking ledger · append-only</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-6">History</h2>
           <ol>
-            {[...events].reverse().map((ev, i) => (
-              <li key={ev.id} className="tl-item">
-                <span className={`tl-dot ${i === 0 ? "tl-dot-done" : ""} ${ev.status === "FAILED" ? "tl-dot-fail" : ""}`}>
-                  {i === 0 && <Check size={11} strokeWidth={3} className="text-white" />}
-                </span>
-                <div className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="font-semibold text-sm">{STATUS_LABELS[ev.status]}</span>
-                  <span className="micro">{fmtDate(ev.createdAt)} · {fmtTime(ev.createdAt)}</span>
-                </div>
-                {ev.note && <p className="text-sm text-[var(--color-ink-2)] mt-0.5">{ev.note}</p>}
-                <p className="micro mt-1">by {ev.actorName} ({ev.actorRole.toLowerCase()})</p>
-              </li>
-            ))}
+            {[...events].reverse().map((ev, i) => {
+              const latest = i === 0;
+              const dotCls =
+                ev.status === "FAILED" ? "tl-dot-fail"
+                : latest && ev.status === "DELIVERED" ? "tl-dot-go"
+                : latest ? "tl-dot-signal"
+                : "";
+              const filled = ["tl-dot-done", "tl-dot-go", "tl-dot-fail"].includes(dotCls);
+              return (
+                <li key={ev.id} className="tl-item">
+                  <span className={`tl-dot ${filled && dotCls !== "tl-dot-signal" ? "tl-dot-done" : ""} ${dotCls}`}>
+                    {dotCls === "tl-dot-go" || dotCls === "tl-dot-fail" || filled ? (
+                      <Check size={11} strokeWidth={3} className="text-white" />
+                    ) : dotCls === "tl-dot-signal" ? (
+                      <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-[var(--color-signal)]" />
+                    ) : null}
+                  </span>
+                  <div className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="font-semibold text-sm">{STATUS_LABELS[ev.status]}</span>
+                    <span className="micro">{fmtDate(ev.createdAt)} · {fmtTime(ev.createdAt)}</span>
+                  </div>
+                  {ev.note && <p className="text-sm text-[var(--color-ink-2)] mt-0.5">{ev.note}</p>}
+                  <p className="micro mt-1">by {ev.actorName} ({ev.actorRole.toLowerCase()})</p>
+                </li>
+              );
+            })}
           </ol>
         </section>
       </div>

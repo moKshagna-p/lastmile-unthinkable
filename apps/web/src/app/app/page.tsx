@@ -71,7 +71,7 @@ export default function CustomerHome() {
                   <td className="font-mono tabular-nums">{fmtMoney(o.totalCharge)}</td>
                   <td><Stamp status={o.status} /></td>
                   <td className="text-[var(--color-ink-2)] whitespace-nowrap">{fmtDate(o.createdAt)}</td>
-                  <td><Link href={`/app/orders/${o.id}`} className="btn btn-ghost !py-1.5 !px-3">Track</Link></td>
+                  <td><Link href={`/app/orders/${o.id}`} className="btn btn-ghost btn-sm">Track</Link></td>
                 </tr>
               ))}
             </tbody>

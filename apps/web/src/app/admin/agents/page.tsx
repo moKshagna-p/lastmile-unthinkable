@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Plus } from "lucide-react";
 import { Shell } from "@/components/shell";
-import { ErrorNote, Field, Micro, Spinner, Stat } from "@/components/ui";
+import { ErrorNote, Field, LoadBar, Micro, Spinner, Stat } from "@/components/ui";
 import { api } from "@/lib/api";
 
 interface AgentRow {
@@ -109,7 +109,12 @@ export default function AgentsAdmin() {
                   </td>
                   <td>{a.zoneName ?? "—"}</td>
                   <td className="font-mono text-xs tabular-nums">{a.currentLat.toFixed(3)}, {a.currentLng.toFixed(3)}</td>
-                  <td className="font-mono tabular-nums">{a.activeLoad}/{a.capacity}</td>
+                  <td className="font-mono tabular-nums">
+                    <div className="flex items-center gap-2">
+                      <span>{a.activeLoad}/{a.capacity}</span>
+                      <div className="w-16"><LoadBar used={a.activeLoad} capacity={a.capacity} /></div>
+                    </div>
+                  </td>
                   <td><span className={`stamp ${a.activeLoad >= a.capacity ? "stamp-hold" : a.status === "AVAILABLE" ? "stamp-go" : "stamp-stop"}`}>
                     {a.activeLoad >= a.capacity ? "At capacity" : a.status === "AVAILABLE" ? "Available" : "Offline"}
                   </span></td>
@@ -117,7 +122,7 @@ export default function AgentsAdmin() {
                     <button
                       disabled={busy}
                       onClick={() => act(() => api(`/admin/agents/${a.id}`, { method: "PATCH", body: { status: a.status === "AVAILABLE" ? "OFFLINE" : "AVAILABLE" } }))}
-                      className="btn btn-ghost !py-1 !px-3"
+                      className="btn btn-ghost btn-sm"
                     >
                       {a.status === "AVAILABLE" ? "Set offline" : "Set available"}
                     </button>

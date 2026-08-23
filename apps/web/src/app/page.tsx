@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Boxes, MapPin, Radar, Route, ShieldCheck, Siren } from "lucide-react";
+import { ArrowRight, Bike, Boxes, LayoutDashboard, MapPin, Package, Radar, Route, ShieldCheck, Siren } from "lucide-react";
 import { Barcode } from "@/components/ui";
 
 const FEATURES = [
@@ -155,6 +155,23 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Proof band */}
+      <section className="max-w-6xl mx-auto px-6 pt-16">
+        <div className="card grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-[var(--color-line)] overflow-hidden">
+          {[
+            ["6-step", "pricing engine, zero hardcoded rates"],
+            ["1 : 1", "pincode → zone mapping, never ambiguous"],
+            ["0", "rows editable in the tracking ledger"],
+            ["25 km", "dispatch radius with zone affinity"],
+          ].map(([n, t]) => (
+            <div key={t} className="p-5 bg-[#fffdf8]">
+              <p className="font-display font-bold text-2xl text-[var(--color-signal)] tracking-tight">{n}</p>
+              <p className="micro mt-1 normal-case !tracking-normal">{t}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight max-w-lg">
@@ -178,16 +195,16 @@ export default function Landing() {
       <section className="max-w-6xl mx-auto px-6 pb-24">
         <div className="grid md:grid-cols-3 gap-4">
           {[
-            { role: "Customer", body: "Register, place orders with upfront pricing, watch the live timeline, reschedule failed attempts.", href: "/register", cta: "Create account" },
-            { role: "Admin", body: "Own the network: zones & pincode mapping, rate cards, COD surcharges, agents, overrides.", href: "/login", cta: "Open console" },
-            { role: "Agent", body: "A focused run sheet: today's deliveries, one-tap scans, failure reasons, live location pings.", href: "/login", cta: "Go on duty" },
+            { icon: Package, role: "Customer", body: "Register, place orders with upfront pricing, watch the live timeline, reschedule failed attempts.", href: "/register", cta: "Create account" },
+            { icon: LayoutDashboard, role: "Admin", body: "Own the network: zones & pincode mapping, rate cards, COD surcharges, agents, overrides.", href: "/login", cta: "Open console" },
+            { icon: Bike, role: "Agent", body: "A focused run sheet: today's deliveries, one-tap scans, failure reasons, live location pings.", href: "/login", cta: "Go on duty" },
           ].map((r) => (
             <div key={r.role} className="card p-6 flex flex-col group">
-              <ShieldCheck size={18} className="text-[var(--color-ink-3)]" />
+              <r.icon size={18} strokeWidth={1.75} className="text-[var(--color-signal)]" />
               <h3 className="font-display font-bold text-lg mt-3">{r.role}</h3>
               <p className="text-sm text-[var(--color-ink-2)] leading-relaxed mt-1.5 flex-1">{r.body}</p>
-              <Link href={r.href} className="btn btn-ghost mt-5 self-start">
-                {r.cta} <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-1" />
+              <Link href={r.href} className="btn btn-ghost btn-sm mt-5 self-start">
+                {r.cta} <ArrowRight size={12} className="transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
           ))}
