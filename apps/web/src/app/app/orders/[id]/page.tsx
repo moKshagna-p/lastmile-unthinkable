@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { CalendarClock, Check, MapPin, Phone, X } from "lucide-react";
+import { CalendarClock, Check, MapPin, Phone, Truck, X } from "lucide-react";
 import { Shell } from "@/components/shell";
 import { ErrorNote, Field, Micro, Spinner, Stamp } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -94,7 +94,15 @@ export default function OrderTracking() {
           </div>
           <div className="hidden md:flex flex-col items-center px-4">
             <span className="micro !text-[var(--color-signal)]">{order.orderType} · {order.paymentType}{order.codAmount ? ` · ₹${order.codAmount}` : ""}</span>
-            <div className="route-dash w-28 my-2" />
+            <div className="relative w-28 my-2.5">
+              <div className={`route-dash w-full ${["PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY"].includes(order.status) ? "route-dash-live" : ""}`} />
+              {order.status !== "PLACED" && order.status !== "DELIVERED" && (
+                <Truck size={15} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[#fffdf8] px-[3px] text-[var(--color-signal)]" />
+              )}
+              {order.status === "DELIVERED" && (
+                <Check size={15} strokeWidth={3} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[#fffdf8] px-[3px] text-[var(--color-go)]" />
+              )}
+            </div>
             <span className="micro">{fmtKg(order.billableWeightKg)} billable</span>
           </div>
           <div className="md:text-right">
@@ -129,19 +137,34 @@ export default function OrderTracking() {
           <Micro>Tracking history · immutable</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-6">Journey</h2>
           <ol>
-            {[...events].reverse().map((ev, i) => (
-              <li key={ev.id} className="tl-item">
-                <span className={`tl-dot ${i === 0 ? "tl-dot-done" : ""} ${ev.status === "FAILED" ? "tl-dot-fail" : ""}`}>
-                  {i === 0 && <Check size={11} strokeWidth={3} className={ev.status === "FAILED" ? "text-white" : "text-white"} />}
-                </span>
-                <div className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="font-semibold text-sm">{STATUS_LABELS[ev.status]}</span>
-                  <span className="micro">{fmtDate(ev.createdAt)} · {fmtTime(ev.createdAt)}</span>
-                </div>
-                {ev.note && <p className="text-sm text-[var(--color-ink-2)] mt-0.5">{ev.note}</p>}
-                <p className="micro mt-1">by {ev.actorName} ({ev.actorRole.toLowerCase()})</p>
-              </li>
-            ))}
+            {[...events].reverse().map((ev, i) => {
+              const latest = i === 0;
+              const dotCls =
+                ev.status === "FAILED" ? "tl-dot-fail"
+                : latest && ev.status === "DELIVERED" ? "tl-dot-go"
+                : latest ? "tl-dot-signal"
+                : "";
+              const filled = ["tl-dot-done", "tl-dot-go", "tl-dot-fail"].includes(dotCls);
+              return (
+                <li key={ev.id} className="tl-item">
+                  <span className={`tl-dot ${filled ? "tl-dot-done" : ""} ${dotCls}`}>
+                    {dotCls === "tl-dot-go" || dotCls === "tl-dot-fail" ? (
+                      <Check size={11} strokeWidth={3} className="text-white" />
+                    ) : dotCls === "tl-dot-signal" ? (
+                      <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-[var(--color-signal)]" />
+                    ) : filled ? (
+                      <Check size={11} strokeWidth={3} className="text-white" />
+                    ) : null}
+                  </span>
+                  <div className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="font-semibold text-sm">{STATUS_LABELS[ev.status]}</span>
+                    <span className="micro">{fmtDate(ev.createdAt)} · {fmtTime(ev.createdAt)}</span>
+                  </div>
+                  {ev.note && <p className="text-sm text-[var(--color-ink-2)] mt-0.5">{ev.note}</p>}
+                  <p className="micro mt-1">by {ev.actorName} ({ev.actorRole.toLowerCase()})</p>
+                </li>
+              );
+            })}
           </ol>
         </section>
 

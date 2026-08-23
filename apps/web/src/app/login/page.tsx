@@ -38,7 +38,7 @@ export default function Login() {
     <main className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md rise">
         <Link href="/" className="flex items-center gap-2.5 mb-8 justify-center">
-          <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-extrabold text-sm">L</span>
+          <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-sm">L</span>
           <span className="font-display font-bold tracking-tight text-lg">LastMile</span>
         </Link>
         <form onSubmit={submit} className="card p-7">
@@ -62,6 +62,23 @@ export default function Login() {
               Create a customer account
             </Link>
           </p>
+          <details className="mt-5 border-t border-dashed border-[var(--color-line-2)] pt-4">
+            <summary className="cursor-pointer select-none w-fit micro hover:text-[var(--color-ink)] transition-colors">
+              Demo accounts · password <span className="font-mono text-[var(--color-ink)]">Password@123</span>
+            </summary>
+            <div className="grid gap-2 mt-3 font-mono text-xs">
+              {[
+                ["ADMIN", "admin@lastmile.dev"],
+                ["CUSTOMER", "customer@lastmile.dev"],
+                ["AGENT", "vikram@lastmile.dev"],
+              ].map(([role, email]) => (
+                <div key={role} className="flex items-center justify-between border border-[var(--color-line)] rounded px-3 py-2 bg-[var(--color-paper-2)]">
+                  <span className="micro">{role}</span>
+                  <span className="text-[var(--color-ink)]">{email}</span>
+                </div>
+              ))}
+            </div>
+          </details>
         </form>
       </div>
     </main>

@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { MapPin, PackageCheck, Truck, XCircle } from "lucide-react";
 import { Shell } from "@/components/shell";
-import { ErrorNote, Micro, Spinner, Stamp, Stat } from "@/components/ui";
+import { EmptyState, ErrorNote, Micro, Spinner, Stamp, Stat } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtMoney } from "@/lib/format";
 import type { OrderStatus } from "@lastmile/shared";
+import { MapPin, PackageSearch, PackageCheck, Truck, XCircle } from "lucide-react";
 
 interface AgentOrder {
   id: string; code: string; status: OrderStatus;
@@ -114,10 +114,12 @@ export default function AgentConsole() {
         {isLoading ? (
           <Spinner label="Loading runs" />
         ) : orders.length === 0 ? (
-          <div className="card p-10 text-center">
-            <PackageCheck size={28} className="mx-auto text-[var(--color-ink-3)]" />
-            <p className="font-display font-bold text-lg mt-3">No active runs</p>
-            <p className="text-sm text-[var(--color-ink-2)] mt-1">New assignments appear here the moment dispatch tags you.</p>
+          <div className="card">
+            <EmptyState
+              icon={<PackageSearch size={20} />}
+              title="No active runs"
+              body="New assignments appear here the moment dispatch tags you."
+            />
           </div>
         ) : (
           orders.map((o) => {

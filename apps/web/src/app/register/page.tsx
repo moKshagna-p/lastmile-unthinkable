@@ -48,7 +48,7 @@ export default function Register() {
     <main className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md rise">
         <Link href="/" className="flex items-center gap-2.5 mb-8 justify-center">
-          <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-extrabold text-sm">L</span>
+          <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-sm">L</span>
           <span className="font-display font-bold tracking-tight text-lg">LastMile</span>
         </Link>
         <form onSubmit={submit} className="card p-7">

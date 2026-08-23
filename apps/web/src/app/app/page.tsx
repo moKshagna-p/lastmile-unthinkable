@@ -3,10 +3,11 @@
 import useSWR from "swr";
 import Link from "next/link";
 import { Shell } from "@/components/shell";
-import { Stamp, Spinner, Stat } from "@/components/ui";
+import { EmptyState, Stamp, Spinner, Stat } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtDate, fmtMoney } from "@/lib/format";
 import type { OrderStatus } from "@lastmile/shared";
+import { PackageOpen } from "lucide-react";
 
 interface OrderRow {
   id: string; code: string; status: OrderStatus; totalCharge: number;
@@ -47,11 +48,12 @@ export default function CustomerHome() {
         ) : error ? (
           <p className="p-6 text-sm text-[var(--color-stop)]">Could not load orders. Is the API running?</p>
         ) : orders.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="font-display font-bold text-lg">No shipments yet</p>
-            <p className="text-sm text-[var(--color-ink-2)] mt-1">Place your first order — pricing is quoted before you confirm.</p>
-            <Link href="/app/new" className="btn btn-primary mt-5">Place an order</Link>
-          </div>
+          <EmptyState
+            icon={<PackageOpen size={20} />}
+            title="No shipments yet"
+            body="Place your first order — pricing is quoted by the rate engine before you confirm."
+            action={<Link href="/app/new" className="btn btn-primary">Place an order</Link>}
+          />
         ) : (
           <table className="tbl">
             <thead>

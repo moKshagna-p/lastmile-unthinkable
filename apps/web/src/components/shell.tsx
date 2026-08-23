@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { authClient, type SessionUser } from "@/lib/auth-client";
 
@@ -16,6 +16,7 @@ export function Shell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user as unknown as SessionUser | undefined;
 
@@ -58,13 +59,14 @@ export function Shell({
       <header className="border-b border-[var(--color-line)] bg-[#fffdf8]/90 backdrop-blur sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <Link href={home} className="flex items-center gap-2 shrink-0">
-            <span className="w-6 h-6 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-extrabold text-xs">L</span>
+            <span className="w-6 h-6 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-xs">L</span>
             <span className="font-display font-bold tracking-tight">{title}</span>
           </Link>
           <nav className="flex items-center gap-1 min-w-0">
-            <NavLinks role={user.role} />
+            <NavLinks role={user.role} pathname={pathname} />
             <div className="hidden sm:block h-5 w-px bg-[var(--color-line-2)] mx-2" />
             <span className="micro hidden md:inline truncate max-w-40">{user.name}</span>
+            <span className="stamp stamp-ink hidden lg:inline-flex">{user.role}</span>
             <button onClick={logout} className="btn btn-ghost !py-1.5 !px-3 ml-1">Logout</button>
           </nav>
         </div>
@@ -80,7 +82,7 @@ export function Shell({
   );
 }
 
-function NavLinks({ role }: { role: string }) {
+function NavLinks({ role, pathname }: { role: string; pathname: string }) {
   const links =
     role === "ADMIN"
       ? [["Overview", "/admin"], ["Network", "/admin/network"], ["Pricing", "/admin/pricing"], ["Agents", "/admin/agents"]]
@@ -89,11 +91,23 @@ function NavLinks({ role }: { role: string }) {
         : [["My orders", "/app"], ["New order", "/app/new"]];
   return (
     <>
-      {links.map(([label, href]) => (
-        <Link key={href} href={href} className="font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded hover:bg-[var(--color-paper-2)] text-[var(--color-ink-2)] hover:text-[var(--color-ink)] transition-colors whitespace-nowrap">
-          {label}
-        </Link>
-      ))}
+      {links.map(([label, href]) => {
+        const active = pathname === href || pathname.startsWith(`${href}/`);
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={`font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
+              active
+                ? "bg-[var(--color-ink)] text-[var(--color-paper)]"
+                : "text-[var(--color-ink-2)] hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]"
+            }`}
+          >
+            {label}
+          </Link>
+        );
+      })}
     </>
   );
 }

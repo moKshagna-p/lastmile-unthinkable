@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Boxes, MapPin, Radar, Route, ShieldCheck, Siren } from "lucide-react";
+import { Barcode } from "@/components/ui";
 
 const FEATURES = [
   {
@@ -39,7 +40,7 @@ export default function Landing() {
       <header className="border-b border-[var(--color-line)]">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-extrabold text-sm">L</span>
+            <span className="w-7 h-7 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-sm">L</span>
             <span className="font-display font-bold tracking-tight text-lg">LastMile</span>
           </div>
           <nav className="flex items-center gap-2">
@@ -54,7 +55,7 @@ export default function Landing() {
         <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-14 items-start">
           <div>
             <p className="micro rise">Delivery operations platform · B2B + B2C</p>
-            <h1 className="rise rise-1 font-display font-extrabold text-[clamp(44px,7vw,84px)] leading-[0.95] tracking-tight mt-4">
+            <h1 className="rise rise-1 font-display font-bold text-[clamp(44px,7vw,84px)] leading-[0.95] tracking-tight mt-4">
               Every parcel.
               <br />
               <span className="text-[var(--color-signal)]">Accounted for.</span>
@@ -69,6 +70,16 @@ export default function Landing() {
                 Place your first order <ArrowRight size={15} />
               </Link>
               <Link href="/login" className="btn btn-outline">Explore the console</Link>
+            </div>
+
+            {/* Spec strip */}
+            <div className="rise rise-4 mt-8 flex items-center gap-4 flex-wrap">
+              {["Zone-aware pricing", "Nearest-rider dispatch", "Immutable scan ledger"].map((s) => (
+                <span key={s} className="flex items-center gap-4">
+                  <span className="micro !text-[var(--color-ink-2)]">{s}</span>
+                  <span aria-hidden className="route-dash w-10" />
+                </span>
+              ))}
             </div>
 
             {/* Demo credentials */}
@@ -124,13 +135,17 @@ export default function Landing() {
                 <dt className="micro self-center text-[var(--color-signal)]">Total</dt>
                 <dd className="text-right font-semibold text-[var(--color-signal)]">₹795.00</dd>
               </dl>
+              <div className="mt-5 pt-4 border-t border-dashed border-[var(--color-line-2)] flex items-end justify-between gap-4">
+                <Barcode value="LM-2026-00042" className="h-9 w-40 text-[var(--color-ink)]" />
+                <span className="micro !text-[var(--color-ink-3)] shrink-0">Shipper&rsquo;s copy</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Status marquee */}
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-paper-2)] overflow-hidden py-3">
+      <section className="marquee border-y border-[var(--color-line)] bg-[var(--color-paper-2)] overflow-hidden py-3">
         <div className="marquee-track">
           {[...MARQUEE, ...MARQUEE].map((s, i) => (
             <span key={i} className="mx-6 font-mono text-xs tracking-[0.18em] uppercase text-[var(--color-ink-2)] whitespace-nowrap">
@@ -149,7 +164,7 @@ export default function Landing() {
           {FEATURES.map((f) => (
             <article key={f.kicker} className="bg-[#fffdf8] p-8 hover:bg-white transition-colors group">
               <div className="flex items-center justify-between">
-                <f.icon size={22} strokeWidth={1.75} className="text-[var(--color-signal)]" />
+                <f.icon size={22} strokeWidth={1.75} className="text-[var(--color-signal)] transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110" />
                 <span className="micro">{f.kicker}</span>
               </div>
               <h3 className="font-display font-bold text-xl mt-5 tracking-tight">{f.title}</h3>
@@ -167,11 +182,13 @@ export default function Landing() {
             { role: "Admin", body: "Own the network: zones & pincode mapping, rate cards, COD surcharges, agents, overrides.", href: "/login", cta: "Open console" },
             { role: "Agent", body: "A focused run sheet: today's deliveries, one-tap scans, failure reasons, live location pings.", href: "/login", cta: "Go on duty" },
           ].map((r) => (
-            <div key={r.role} className="card p-6 flex flex-col">
+            <div key={r.role} className="card p-6 flex flex-col group">
               <ShieldCheck size={18} className="text-[var(--color-ink-3)]" />
               <h3 className="font-display font-bold text-lg mt-3">{r.role}</h3>
               <p className="text-sm text-[var(--color-ink-2)] leading-relaxed mt-1.5 flex-1">{r.body}</p>
-              <Link href={r.href} className="btn btn-ghost mt-5 self-start">{r.cta} <ArrowRight size={13} /></Link>
+              <Link href={r.href} className="btn btn-ghost mt-5 self-start">
+                {r.cta} <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
             </div>
           ))}
         </div>
@@ -179,7 +196,10 @@ export default function Landing() {
 
       <footer className="border-t border-[var(--color-line)]">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="micro">LastMile · unthinkable build</span>
+          <span className="flex items-center gap-2.5">
+            <span className="w-5 h-5 bg-[var(--color-signal)] text-white grid place-items-center rounded-[3px] font-display font-bold text-[10px]">L</span>
+            <span className="micro">LastMile · unthinkable build</span>
+          </span>
           <span className="micro">Bun · Next.js · Postgres</span>
         </div>
       </footer>
