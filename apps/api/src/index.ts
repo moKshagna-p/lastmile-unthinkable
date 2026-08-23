@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "bun";
 import { env } from "./env";
+import { freePort } from "./scripts/free-port";
 import { attachUser, auth } from "./lib/auth";
 import { orderRoutes, ValidationError } from "./routes/orders";
 import { adminRoutes } from "./routes/admin";
@@ -44,11 +45,14 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-// Bind to the configured port. free-port.ts (dev script) normally clears any
-// stale listener before we get here; this fail-fast remains as the last-resort
-// guard: the web app targets this exact URL (localhost:4000), so silently
-// hopping ports would leave the frontend calling a dead endpoint.
+// Bind to the configured port. Before binding, free any stale listener from a
+// previous session — this covers EVERY launch path (bun run dev, the raw
+// `bun --hot src/index.ts`, anything). Production skips cleanup; there, an
+// EADDRINUSE fail-fast remains as the guard: the web app targets this exact
+// URL, so silently hopping ports would leave the frontend calling a dead
+// endpoint.
 const port = env.port;
+if (process.env.NODE_ENV !== "production") await freePort(port);
 const server = (() => {
   try {
     return serve({ port, fetch: app.fetch });
