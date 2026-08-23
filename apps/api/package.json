@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
+    "dev": "bun run src/scripts/free-port.ts && bun --hot src/index.ts",
     "start": "bun src/index.ts",
     "migrate": "bun run src/db/migrate.ts",
     "seed": "bun run src/db/seed.ts",
