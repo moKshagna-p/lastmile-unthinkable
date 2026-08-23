@@ -6,7 +6,8 @@
   },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "bun run --filter='*' dev",
+    "dev": "mprocs",
+    "dev:plain": "bun run --filter='*' dev",
     "dev:api": "bun run --filter='@lastmile/api' dev",
     "dev:web": "bun run --filter='@lastmile/web' dev",
     "db:up": "docker compose up -d db",
@@ -15,5 +16,8 @@
     "build": "bun run --filter='*' build",
     "test": "bun test",
     "typecheck": "bun run --filter='*' typecheck"
+  },
+  "devDependencies": {
+    "mprocs": "^0.9.6"
   }
 }

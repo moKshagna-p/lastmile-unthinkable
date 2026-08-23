@@ -40,11 +40,17 @@ bun run db:seed
 ### 3. Run
 
 ```bash
-# terminal 1 — API on :4000
-bun run dev:api
+# one TUI, two panes — API on :4000 + web on :3000
+bun run dev
+```
 
-# terminal 2 — web on :3000
-bun run dev:web
+Press `r` to restart a pane (the API self-heals its port on every boot),
+`q` to quit everything cleanly. Prefer plain terminals?
+
+```bash
+bun run dev:plain   # both apps, no TUI
+bun run dev:api     # API only
+bun run dev:web     # web only
 ```
 
 Open **http://localhost:3000**.
