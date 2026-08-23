@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "bun";
 import { env } from "./env";
+import { freePort } from "./scripts/free-port";
 import { attachUser, auth } from "./lib/auth";
 import { orderRoutes, ValidationError } from "./routes/orders";
 import { adminRoutes } from "./routes/admin";
@@ -44,22 +45,34 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-// Bind to the configured port. Fail fast if it's taken: the web app targets
-// this exact URL (localhost:4000), so silently hopping ports would leave the
-// frontend calling a dead endpoint. Kill the stale process instead.
+// Bind to the configured port. Before binding, free any stale listener from a
+// previous session — this covers EVERY launch path (bun run dev, the raw
+// `bun --hot src/index.ts`, anything). Production skips cleanup; there, an
+// EADDRINUSE fail-fast remains as the guard: the web app targets this exact
+// URL, so silently hopping ports would leave the frontend calling a dead
+// endpoint.
 const port = env.port;
-try {
-  serve({ port, fetch: app.fetch });
-} catch (err) {
-  const e = err as { code?: string };
-  if (e?.code === "EADDRINUSE") {
-    console.error(
-      `\n✗ Port ${port} is already in use — a previous dev server is still running.\n` +
-        `  Find it:  lsof -nP -iTCP:${port} -sTCP:LISTEN\n` +
-        `  Kill it:  kill <PID>   (use kill -9 <PID> if it ignores SIGTERM)\n`,
-    );
-    process.exit(1);
+if (process.env.NODE_ENV !== "production") await freePort(port);
+const server = (() => {
+  try {
+    return serve({ port, fetch: app.fetch });
+  } catch (err) {
+    const e = err as { code?: string };
+    if (e?.code === "EADDRINUSE") {
+      console.error(`\n✗ Port ${port} still busy after cleanup — inspect: lsof -nP -iTCP:${port} -sTCP:LISTEN\n`);
+      process.exit(1);
+    }
+    throw err;
   }
-  throw err;
+})();
+
+// Graceful shutdown — release the socket cleanly on Ctrl+C / kill so the next
+// boot never has to fight a zombie listener in the first place.
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.on(signal, () => {
+    console.log(`\n${signal} — shutting down…`);
+    server.stop(true);
+    process.exit(0);
+  });
 }
 console.log(`🚚 LastMile API listening on http://localhost:${port}`);
