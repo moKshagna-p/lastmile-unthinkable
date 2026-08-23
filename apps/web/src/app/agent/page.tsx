@@ -16,6 +16,22 @@ interface AgentOrder {
   customerName: string; customerPhone: string;
 }
 
+/**
+ * Real GPS fix via the browser (secure contexts only — localhost counts).
+ * Resolves null when geolocation is unavailable or denied so scans still go
+ * through without coordinates; the server treats lat/lng as an optional ping.
+ */
+function getPosition(): Promise<{ lat: number; lng: number } | null> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30_000 },
+    );
+  });
+}
+
 const NEXT_ACTIONS: Record<string, Array<{ to: OrderStatus; label: string; kind: "go" | "mid" | "fail" }>> = {
   ASSIGNED: [{ to: "PICKED_UP", label: "Pick up parcel", kind: "go" }],
   PICKED_UP: [{ to: "IN_TRANSIT", label: "Start transit", kind: "mid" }],
@@ -33,14 +49,19 @@ export default function AgentConsole() {
   const [reason, setReason] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [dutyBusy, setDutyBusy] = useState(false);
 
   async function scan(orderId: string, status: OrderStatus, note?: string) {
     setBusy(true);
     setErr(null);
     try {
+      // Real position per scan — feeds agents.currentLat/Lng, which the
+      // dispatcher's findNearestAgent() matches against. Omitted when the
+      // browser can't provide a fix.
+      const pos = await getPosition();
       await api(`/agent/orders/${orderId}/status`, {
         method: "POST",
-        body: { status, note, lat: 12.9 + Math.random() * 0.2, lng: 77.5 + Math.random() * 0.2 },
+        body: { status, note, ...(pos ?? {}) },
       });
       setFailFor(null);
       setReason("");
@@ -53,10 +74,18 @@ export default function AgentConsole() {
   }
 
   async function toggleDuty() {
-    if (!me) return;
+    if (!me || dutyBusy) return;
     const next = me.agent.status === "AVAILABLE" ? "OFFLINE" : "AVAILABLE";
-    await api("/agent/status", { method: "PATCH", body: { status: next } });
-    mutate();
+    setDutyBusy(true);
+    setErr(null);
+    try {
+      await api("/agent/status", { method: "PATCH", body: { status: next } });
+      await mutate();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Could not change duty status");
+    } finally {
+      setDutyBusy(false);
+    }
   }
 
   const orders = data?.orders ?? [];
@@ -68,8 +97,8 @@ export default function AgentConsole() {
           <h1 className="font-display font-bold text-3xl tracking-tight">Run sheet</h1>
           <p className="micro mt-1">{me ? `${me.name} · ${me.agent.code}` : "…"}</p>
         </div>
-        <button onClick={toggleDuty} className={`btn ${me?.agent.status === "AVAILABLE" ? "btn-outline" : "btn-primary"}`}>
-          {me?.agent.status === "AVAILABLE" ? "Go offline" : "Go on duty"}
+        <button onClick={toggleDuty} disabled={!me || dutyBusy} className={`btn ${me?.agent.status === "AVAILABLE" ? "btn-outline" : "btn-primary"}`}>
+          {dutyBusy ? "Switching…" : me?.agent.status === "AVAILABLE" ? "Go offline" : "Go on duty"}
         </button>
       </div>
 
