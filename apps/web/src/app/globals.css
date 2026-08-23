@@ -299,6 +299,46 @@ select.field { appearance: auto; padding-right: 0.8rem; }
 .shell-content { width: 100%; max-width: 1280px; flex: 1; margin: 0 auto; padding: 2.5rem clamp(1rem, 3vw, 2.5rem) 4rem; }
 .shell-footer { display: flex; min-height: 44px; align-items: center; justify-content: space-between; padding: 0 1.5rem; color: var(--color-muted); border-top: 1px solid var(--color-rule); font: 9px var(--font-mono); letter-spacing: 0.06em; }
 
+/* Rider role: the same grid tuned for glare, motion and thumbs. */
+.app-shell[data-role="agent"] {
+  --color-canvas: #0a0b0a;
+  --color-surface: #121512;
+  --color-ink: #f0f1ec;
+  --color-muted: #a5aca4;
+  --color-rule: #394039;
+  --color-paper: #0a0b0a;
+  --color-paper-2: #1a1f1a;
+  --color-ink-2: #a5aca4;
+  --color-ink-3: #848c84;
+  --color-line: #394039;
+  --color-line-2: #515a51;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+}
+.app-shell[data-role="agent"] .shell-top { background: color-mix(in srgb, #0a0b0a 94%, transparent); }
+.app-shell[data-role="agent"] .brand-wordmark { color: var(--color-signal); }
+.app-shell[data-role="agent"] .shell-nav-link-active { color: #0a0b0a; }
+.app-shell[data-role="agent"] .btn-primary,
+.app-shell[data-role="agent"] .btn-go { color: #0a0b0a; }
+.app-shell[data-role="agent"] .btn-outline:hover { color: #0a0b0a; }
+.app-shell[data-role="agent"] .stamp-signal { color: #0a0b0a; }
+.app-shell[data-role="agent"] .field:focus { box-shadow: inset 4px 0 0 var(--color-signal); }
+.rider-head { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-ink); }
+.rider-head h1 { margin-top: 0.5rem; font-family: var(--font-display); font-size: clamp(3rem, 8vw, 6.5rem); line-height: 0.82; letter-spacing: -0.07em; }
+.rider-duty { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 0; }
+.rider-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 1.5rem; background: var(--color-rule); }
+.rider-metrics .stat { border: 0; }
+.rider-runs { display: grid; gap: 1rem; margin-top: 2rem; }
+.rider-run { padding: clamp(1.25rem, 3vw, 2rem); background: var(--color-surface); border: 1px solid var(--color-rule); }
+.rider-cod { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; padding: 1rem; color: #0a0b0a; background: var(--color-signal); }
+.rider-cod .micro { color: #0a0b0a; }
+.rider-cod > span:last-child { font: 700 1.7rem var(--font-mono); letter-spacing: -0.05em; }
+.rider-address { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--color-rule); }
+.rider-address > p { display: flex; align-items: start; gap: 0.6rem; font-size: clamp(1.15rem, 3vw, 1.65rem); font-weight: 500; line-height: 1.25; }
+.rider-phone { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--color-signal); font: 13px var(--font-mono); text-decoration: underline; text-underline-offset: 3px; }
+.rider-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.25rem; }
+.rider-failure { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: end; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-stop); }
+
 /* Customer surfaces */
 .customer-latest { display: grid; grid-template-columns: 1.4fr 0.6fr; margin-top: 2rem; background: var(--color-surface); border: 1px solid var(--color-ink); }
 .customer-latest > div { display: flex; min-height: 230px; flex-direction: column; justify-content: space-between; padding: clamp(1.25rem, 3vw, 2rem); }
@@ -433,6 +473,10 @@ select.field { appearance: auto; padding-right: 0.8rem; }
   .customer-latest { grid-template-columns: 1fr; }
   .customer-latest > div { min-height: 190px; }
   .customer-latest > div:first-child { border-right: 0; border-bottom: 1px solid var(--color-ink); }
+  .rider-head { align-items: start; flex-direction: column; }
+  .rider-duty { width: 100%; justify-content: space-between; }
+  .rider-metrics { grid-template-columns: 1fr; }
+  .rider-actions .btn { width: 100%; }
   .filter-bar, .config-grid, .admin-order-grid { grid-template-columns: 1fr; }
   .admin-overview-metrics { grid-template-columns: repeat(2, 1fr); }
   .admin-primary-stat { grid-column: span 2; }

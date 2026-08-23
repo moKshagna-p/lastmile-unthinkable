@@ -92,13 +92,12 @@ export default function AgentConsole() {
 
   return (
     <Shell role="AGENT" title="LastMile · Rider">
-      <div className="flex flex-wrap items-center justify-between gap-4 rise">
+      <header className="rider-head">
         <div>
-          <h1 className="font-display font-bold text-3xl tracking-tight">Run sheet</h1>
-          <p className="micro mt-1">{me ? `${me.name} · ${me.agent.code}` : "…"}</p>
+          <p className="micro">{me ? `${me.name} / ${me.agent.code}` : "…"}</p>
+          <h1>Run sheet.</h1>
         </div>
-        {/* Duty switch — glanceable state, one-tap flip */}
-        <div className="flex items-center gap-3 card px-4 py-2.5">
+        <div className="rider-duty">
           <div className="text-right">
             <Micro>{me?.agent.status === "AVAILABLE" ? "On duty" : "Offline"}</Micro>
             <p className="font-mono text-xs font-semibold mt-0.5">
@@ -107,13 +106,12 @@ export default function AgentConsole() {
           </div>
           <DutyToggle on={me?.agent.status === "AVAILABLE"} disabled={!me || dutyBusy} onClick={toggleDuty} />
         </div>
-      </div>
+      </header>
 
-      <div className="grid sm:grid-cols-3 gap-4 mt-6 rise rise-1">
+      <div className="rider-metrics">
         <Stat label="Active runs" value={orders.length} />
         <Stat label="COD to collect" value={fmtMoney(orders.reduce((s, o) => s + (o.paymentType === "COD" && !["DELIVERED"].includes(o.status) ? (o.codAmount ?? 0) : 0), 0))} />
-        <div className="card px-5 py-4 relative overflow-hidden">
-          <span aria-hidden className="absolute left-0 top-0 h-full w-[3px] bg-[var(--color-signal)] opacity-70" />
+        <div className="stat">
           <Micro>Capacity used</Micro>
           <div className="font-mono text-2xl font-semibold mt-1 tabular-nums">{me ? `${orders.length}/${me.agent.capacity}` : "—"}</div>
           {me && <div className="mt-2.5"><LoadBar used={orders.length} capacity={me.agent.capacity} /></div>}
@@ -122,11 +120,11 @@ export default function AgentConsole() {
 
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
 
-      <div className="space-y-4 mt-8">
+      <div className="rider-runs">
         {isLoading ? (
           <Spinner label="Loading runs" />
         ) : orders.length === 0 ? (
-          <div className="card">
+          <div className="rider-run">
             <EmptyState
               icon={<PackageSearch size={20} />}
               title="No active runs"
@@ -138,7 +136,7 @@ export default function AgentConsole() {
             const actions = NEXT_ACTIONS[o.status] ?? [];
             const isCod = o.paymentType === "COD" && !["DELIVERED", "FAILED"].includes(o.status);
             return (
-              <article key={o.id} className="card p-5 rise">
+              <article key={o.id} className="rider-run">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-mono font-semibold text-base">{o.code}</p>
@@ -149,28 +147,28 @@ export default function AgentConsole() {
 
                 {/* COD — the number that matters at the door */}
                 {isCod && (
-                  <div className="mt-4 border-2 border-dashed border-[var(--color-signal)] bg-[var(--color-signal-wash)] rounded-[3px] px-4 py-3 flex items-center justify-between gap-3">
-                    <span className="micro !text-[var(--color-signal-deep)]">Collect cash on delivery</span>
-                    <span className="font-mono font-bold text-xl text-[var(--color-signal-deep)] tabular-nums">
+                  <div className="rider-cod">
+                    <span className="micro">Collect cash on delivery</span>
+                    <span>
                       ₹{(o.codAmount ?? 0).toLocaleString("en-IN")}
                     </span>
                   </div>
                 )}
 
-                <div className="mt-4 pt-4 border-t border-dashed border-[var(--color-line-2)]">
-                  <p className="text-[15px] leading-relaxed flex items-start gap-2 font-medium">
+                <div className="rider-address">
+                  <p>
                     <MapPin size={16} className="mt-1 shrink-0 text-[var(--color-signal)]" />
                     {o.dropLine1}
                   </p>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-[var(--color-ink-2)]">
                     <span>{o.dropContactName}</span>
-                    <a href={`tel:${o.dropContactPhone}`} className="flex items-center gap-1.5 font-mono text-[13px] text-[var(--color-go)] hover:text-[var(--color-ink)] hover:underline underline-offset-2 transition-colors">
+                    <a href={`tel:${o.dropContactPhone}`} className="rider-phone">
                       <Phone size={13} /> {o.dropContactPhone}
                     </a>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2.5 mt-5">
+                <div className="rider-actions">
                   {actions.filter((a) => a.kind !== "fail").map((a) => (
                     <button
                       key={a.to}
@@ -190,7 +188,7 @@ export default function AgentConsole() {
 
                 {failFor === o.id && (
                   <form
-                    className="mt-4 border-t border-dashed border-[var(--color-line-2)] pt-4 flex flex-wrap gap-3 items-end"
+                    className="rider-failure"
                     onSubmit={(e) => { e.preventDefault(); if (reason.trim()) scan(o.id, "FAILED", reason.trim()); }}
                   >
                     <div className="flex-1 min-w-56">
