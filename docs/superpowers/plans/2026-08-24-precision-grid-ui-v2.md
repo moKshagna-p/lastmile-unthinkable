@@ -34,7 +34,6 @@
 ### Task 1: Precision Grid foundation
 
 **Files:**
-- Create: `apps/web/src/lib/design-system.test.ts`
 - Modify: `apps/web/src/app/layout.tsx`
 - Modify: `apps/web/src/app/globals.css`
 - Modify: `apps/web/src/components/ui.tsx`
@@ -43,30 +42,13 @@
 - Consumes: existing `Stamp`, `Micro`, `Field`, `ErrorNote`, `Spinner`, `Stat`, `EmptyState`, `Stepper`, `LoadBar`, and `DutyToggle` component signatures.
 - Produces: CSS variables `--color-canvas`, `--color-surface`, `--color-ink`, `--color-muted`, `--color-rule`, `--color-signal`, `--color-stop`, and `--color-hold`; role-neutral classes `.card`, `.btn`, `.field`, `.label`, `.status`, `.stat`, `.table-wrap`, and `.page-head`.
 
-- [ ] **Step 1: Write the failing design-contract test**
+- [ ] **Step 1: Record the clean baseline**
 
-```ts
-import { expect, test } from "bun:test";
+Run: `bun run --filter='@lastmile/web' typecheck`
 
-const css = await Bun.file(new URL("../app/globals.css", import.meta.url)).text();
+Expected: PASS before the visual-only refactor.
 
-test("Precision Grid tokens and restraint are global", () => {
-  for (const token of ["--color-canvas", "--color-surface", "--color-signal", "#38ff62"]) {
-    expect(css.toLowerCase()).toContain(token);
-  }
-  for (const removed of ["radial-gradient", ".marquee-track", ".rise-4", "rotate("]) {
-    expect(css).not.toContain(removed);
-  }
-});
-```
-
-- [ ] **Step 2: Run the test and confirm the old system fails**
-
-Run: `bun test apps/web/src/lib/design-system.test.ts`
-
-Expected: FAIL because `--color-canvas` and `#38ff62` do not exist and the removed motifs still do.
-
-- [ ] **Step 3: Replace the font setup**
+- [ ] **Step 2: Replace the font setup**
 
 ```tsx
 import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
@@ -80,7 +62,7 @@ const archivoBlack = Archivo_Black({
 
 Keep the current Plex font declarations and apply `archivoBlack.variable` to `<body>` instead of `spaceGrotesk.variable`.
 
-- [ ] **Step 4: Replace the global tokens and shared classes**
+- [ ] **Step 3: Replace the global tokens and shared classes**
 
 Start `globals.css` with the approved tokens and a flat canvas:
 
@@ -106,20 +88,20 @@ body { color: var(--color-ink); background: var(--color-canvas); }
 
 Delete paper texture, shadows, rotated decoration, marquee, global staggered reveals, pulsing dots, and pervasive dashed rules. Keep focus, reduced-motion, status, stepper, table, toggle, and load-bar behavior with the new tokens.
 
-- [ ] **Step 5: Simplify shared primitives without changing their props**
+- [ ] **Step 4: Simplify shared primitives without changing their props**
 
 Restyle existing JSX around `.status`, `.stat`, `.empty-state`, and `.progress-track`. Keep `Barcode` temporarily because the old landing page still imports it. Keep lifecycle index logic, capacity math, and duty-switch ARIA unchanged.
 
-- [ ] **Step 6: Run the contract and type checks**
+- [ ] **Step 5: Run the type check**
 
-Run: `bun test apps/web/src/lib/design-system.test.ts && bun run --filter='@lastmile/web' typecheck`
+Run: `bun run --filter='@lastmile/web' typecheck`
 
-Expected: both PASS.
+Expected: PASS.
 
-- [ ] **Step 7: Commit the foundation**
+- [ ] **Step 6: Commit the foundation**
 
 ```bash
-git add apps/web/src/lib/design-system.test.ts apps/web/src/app/layout.tsx apps/web/src/app/globals.css apps/web/src/components/ui.tsx
+git add apps/web/src/app/layout.tsx apps/web/src/app/globals.css apps/web/src/components/ui.tsx
 git commit -m "refactor(ui): establish precision grid system"
 ```
 
@@ -133,33 +115,18 @@ git commit -m "refactor(ui): establish precision grid system"
 - Modify: `apps/web/src/app/error.tsx`
 - Modify: `apps/web/src/app/global-error.tsx`
 - Modify: `apps/web/src/app/not-found.tsx`
-- Modify: `apps/web/src/lib/design-system.test.ts`
 
 **Interfaces:**
 - Consumes: Task 1 tokens/classes and existing `Shell({ role, title, children })` props.
 - Produces: `.app-shell[data-role="admin|customer|agent"]`, `.shell-rail`, `.shell-top`, `.public-nav`, `.public-hero`, and `.auth-layout` surfaces used by later tasks.
 
-- [ ] **Step 1: Extend the source contract before editing**
+- [ ] **Step 1: Record the clean baseline**
 
-```ts
-const landing = await Bun.file(new URL("../app/page.tsx", import.meta.url)).text();
-const shell = await Bun.file(new URL("../components/shell.tsx", import.meta.url)).text();
+Run: `bun run --filter='@lastmile/web' typecheck`
 
-test("public and shell sources use the approved structure", () => {
-  expect(landing).not.toContain("MARQUEE");
-  expect(landing).not.toContain("Barcode");
-  expect(shell).toContain("data-role=");
-  expect(shell).toContain("shell-rail");
-});
-```
+Expected: PASS before the markup refactor.
 
-- [ ] **Step 2: Run the test and confirm it fails**
-
-Run: `bun test apps/web/src/lib/design-system.test.ts`
-
-Expected: FAIL because the old landing still has `MARQUEE`/`Barcode` and the shell has no role data attribute.
-
-- [ ] **Step 3: Make the existing shell visually role-aware**
+- [ ] **Step 2: Make the existing shell visually role-aware**
 
 Keep session and redirect code untouched. Change only the rendered structure:
 
@@ -175,7 +142,7 @@ Keep session and redirect code untouched. Change only the rendered structure:
 
 Render the rail only for admin desktop through CSS; customer and rider use the compact top header. Reuse the current `NavLinks` array and logout function.
 
-- [ ] **Step 4: Rewrite the landing and auth composition**
+- [ ] **Step 3: Rewrite the landing and auth composition**
 
 Use one hero, one live-shipment proof panel, one concise product proof grid, and one role section. Remove the marquee, rotated waybill, barcode, technology footer, and hero demo-credential block. Delete the now-unused `Barcode` export from `components/ui.tsx`. Keep `/login` and `/register` links and retain demo accounts only inside login `<details>`.
 
@@ -190,18 +157,18 @@ Wrap auth pages in:
 
 Do not change submit handlers, field validation, or role routing.
 
-- [ ] **Step 5: Align error routes**
+- [ ] **Step 4: Align error routes**
 
 Use the typographic wordmark, direct error heading, existing error details, and one recovery action. Preserve reset and navigation behavior.
 
-- [ ] **Step 6: Run checks and commit**
+- [ ] **Step 5: Run checks and commit**
 
-Run: `bun test apps/web/src/lib/design-system.test.ts && bun run --filter='@lastmile/web' typecheck`
+Run: `bun run --filter='@lastmile/web' typecheck`
 
 Expected: PASS.
 
 ```bash
-git add apps/web/src/components/shell.tsx apps/web/src/app/page.tsx apps/web/src/app/login/page.tsx apps/web/src/app/register/page.tsx apps/web/src/app/error.tsx apps/web/src/app/global-error.tsx apps/web/src/app/not-found.tsx apps/web/src/lib/design-system.test.ts
+git add apps/web/src/components/shell.tsx apps/web/src/components/ui.tsx apps/web/src/app/page.tsx apps/web/src/app/login/page.tsx apps/web/src/app/register/page.tsx apps/web/src/app/error.tsx apps/web/src/app/global-error.tsx apps/web/src/app/not-found.tsx
 git commit -m "feat(ui): redesign shell and public routes"
 ```
 
