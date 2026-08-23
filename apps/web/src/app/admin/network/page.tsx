@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import AddressAutocomplete from "@/components/address-autocomplete";
 import { Plus, Trash2 } from "lucide-react";
 import { Shell } from "@/components/shell";
 import { ErrorNote, Field, Micro, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
+import type { PlaceSelection } from "@/lib/geocode";
 
 interface Zone { id: string; name: string; code: string; description: string | null; areaCount: number }
 interface Area { id: string; name: string; pincode: string; city: string; zoneId: string; zoneName: string; lat: number; lng: number }
@@ -18,6 +20,19 @@ export default function NetworkAdmin() {
 
   const [zoneForm, setZoneForm] = useState({ name: "", code: "", description: "" });
   const [areaForm, setAreaForm] = useState({ name: "", pincode: "", city: "Bengaluru", zoneId: "", lat: "", lng: "" });
+  const [areaSearch, setAreaSearch] = useState("");
+
+  /** Google— er, Photon pick → prefill the mapping form (still editable). */
+  function autofillFromPlace(sel: PlaceSelection) {
+    setAreaForm((f) => ({
+      ...f,
+      name: f.name || sel.line1,
+      pincode: sel.pincode ?? f.pincode,
+      city: sel.city ?? f.city,
+      lat: String(sel.lat),
+      lng: String(sel.lng),
+    }));
+  }
 
   async function act(fn: () => Promise<unknown>) {
     setBusy(true);
@@ -104,9 +119,23 @@ export default function NetworkAdmin() {
               act(() => api("/admin/areas", {
                 method: "POST",
                 body: { ...areaForm, lat: Number(areaForm.lat), lng: Number(areaForm.lng) },
-              })).then(() => setAreaForm({ name: "", pincode: "", city: "Bengaluru", zoneId: "", lat: "", lng: "" }));
+              })).then(() => {
+                setAreaForm({ name: "", pincode: "", city: "Bengaluru", zoneId: "", lat: "", lng: "" });
+                setAreaSearch("");
+              });
             }}
           >
+            <div className="col-span-2">
+              <AddressAutocomplete
+                id="area-search"
+                label="Search location"
+                value={areaSearch}
+                onValueChange={setAreaSearch}
+                onSelect={autofillFromPlace}
+                placeholder='e.g. "Rajajinagar, Bengaluru" — autofills the form below'
+                note="Free OpenStreetMap lookup · no API key needed"
+              />
+            </div>
             <Field label="Area name"><input className="field" required value={areaForm.name} onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })} placeholder="Rajajinagar" /></Field>
             <Field label="Pincode"><input className="field" required pattern="\d{6}" value={areaForm.pincode} onChange={(e) => setAreaForm({ ...areaForm, pincode: e.target.value })} placeholder="560010" /></Field>
             <Field label="Zone">
