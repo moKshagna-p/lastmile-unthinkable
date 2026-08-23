@@ -131,7 +131,7 @@ export default function AddressAutocomplete({
           id={`${id}-listbox`}
           role="listbox"
           aria-label={`${label} suggestions`}
-          className="absolute z-40 left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-[3px] border border-[var(--color-line-2)] bg-[#fffdf8] shadow-lg shadow-black/10"
+          className="absolute z-40 left-0 right-0 mt-1 max-h-64 overflow-y-auto border border-[var(--color-ink)] bg-[var(--color-surface)]"
         >
           {rows.map((row, i) => (
             <li key={row.id} id={`${id}-opt-${i}`} role="option" aria-selected={i === active}>
@@ -139,8 +139,8 @@ export default function AddressAutocomplete({
                 type="button"
                 onMouseEnter={() => setActive(i)}
                 onClick={() => choose(row)}
-                className={`w-full text-left px-3.5 py-2.5 border-b border-dashed border-[var(--color-line)] last:border-b-0 transition-colors ${
-                  i === active ? "bg-[var(--color-paper-2)]" : ""
+                className={`w-full text-left px-3.5 py-2.5 border-b border-[var(--color-rule)] last:border-b-0 transition-colors ${
+                  i === active ? "bg-[var(--color-subtle)]" : ""
                 }`}
               >
                 <span className="block text-sm font-medium truncate">{row.main}</span>

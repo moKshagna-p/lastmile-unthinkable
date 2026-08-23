@@ -237,11 +237,11 @@ export default function NewOrder() {
                 />
                 {pickupArea ? (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="stamp stamp-go">{pickupArea.zoneName}</span>
+                    <span className="status status-done">{pickupArea.zoneName}</span>
                     <Micro className="normal-case tracking-normal">Serving {pickupArea.name} · {pickupArea.pincode}</Micro>
                   </div>
                 ) : areaWarns.pickup ? (
-                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-paper-2)]">
+                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-subtle)]">
                     ⚠ {areaWarns.pickup}
                   </p>
                 ) : (
@@ -290,11 +290,11 @@ export default function NewOrder() {
                 />
                 {dropArea ? (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="stamp stamp-go">{dropArea.zoneName}</span>
+                    <span className="status status-done">{dropArea.zoneName}</span>
                     <Micro className="normal-case tracking-normal">Serving {dropArea.name} · {dropArea.pincode}</Micro>
                   </div>
                 ) : areaWarns.drop ? (
-                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-paper-2)]">
+                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-subtle)]">
                     ⚠ {areaWarns.drop}
                   </p>
                 ) : (
@@ -362,7 +362,7 @@ export default function NewOrder() {
               <div className="weight-check">
                 <div className="flex items-center justify-between gap-3">
                   <Micro>Weight check · L×B×H ÷ {VOL_DIVISOR}</Micro>
-                  <span className={`stamp ${billedOnVol ? "stamp-signal" : "stamp-go"}`}>
+                  <span className={`status ${billedOnVol ? "status-live" : "status-done"}`}>
                     {billedOnVol ? "Billed on volumetric" : "Billed on actual"}
                   </span>
                 </div>
@@ -421,10 +421,10 @@ export default function NewOrder() {
               <>
                 {(quote.pickupZoneName || quote.dropZoneName) && (
                   <div className="flex items-center gap-2 flex-wrap pt-4">
-                    <span className="stamp stamp-ink">{quote.pickupZoneName ?? "Pickup"}</span>
-                    <span aria-hidden className="route-dash w-6 shrink-0" />
-                    <span className="stamp stamp-ink">{quote.dropZoneName ?? "Drop"}</span>
-                    {quote.intraZone && <span className="stamp stamp-hold">Intra-zone</span>}
+                    <span className="meta-chip">{quote.pickupZoneName ?? "Pickup"}</span>
+                    <span aria-hidden className="route-line w-6 shrink-0" />
+                    <span className="meta-chip">{quote.dropZoneName ?? "Drop"}</span>
+                    {quote.intraZone && <span className="status status-hold">Intra-zone</span>}
                   </div>
                 )}
 
@@ -515,7 +515,7 @@ function Segmented({
   value, onChange, options,
 }: { value: string; onChange: (v: string) => void; options: [string, string][] }) {
   return (
-    <div className="grid grid-cols-2 gap-1 p-1 border border-[var(--color-rule)] bg-[var(--color-paper-2)]" role="radiogroup">
+    <div className="grid grid-cols-2 gap-1 p-1 border border-[var(--color-rule)] bg-[var(--color-subtle)]" role="radiogroup">
       {options.map(([v, label]) => (
         <button
           key={v}
@@ -544,7 +544,7 @@ function WeightBar({ label, kg, max, winner }: { label: string; kg: number; max:
       <span className={`font-mono text-[10.5px] tracking-[0.1em] uppercase w-20 shrink-0 ${winner ? "text-[var(--color-ink)]" : "text-[var(--color-ink-3)]"}`}>
         {label}
       </span>
-      <span className="flex-1 h-2 bg-[var(--color-paper-2)] overflow-hidden">
+      <span className="flex-1 h-2 bg-[var(--color-subtle)] overflow-hidden">
         <span
           className={`block h-full transition-all duration-300 ${winner ? "bg-[var(--color-signal)]" : "bg-[var(--color-line-2)]"}`}
           style={{ width: `${pct}%` }}

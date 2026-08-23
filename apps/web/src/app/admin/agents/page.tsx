@@ -112,7 +112,7 @@ export default function AgentsAdmin() {
                       <div className="w-16"><LoadBar used={a.activeLoad} capacity={a.capacity} /></div>
                     </div>
                   </td>
-                  <td><span className={`stamp ${a.activeLoad >= a.capacity ? "stamp-hold" : a.status === "AVAILABLE" ? "stamp-go" : "stamp-stop"}`}>
+                  <td><span className={`status ${a.activeLoad >= a.capacity ? "status-hold" : a.status === "AVAILABLE" ? "status-done" : "status-failed"}`}>
                     {a.activeLoad >= a.capacity ? "At capacity" : a.status === "AVAILABLE" ? "Available" : "Offline"}
                   </span></td>
                   <td>

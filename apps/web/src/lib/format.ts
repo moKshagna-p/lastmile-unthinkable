@@ -18,13 +18,13 @@ export function fmtTime(iso: string | null | undefined): string {
   return new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Tailwind stamp class per status. */
+/** Visual state class per order status. */
 export function statusStamp(s: OrderStatus): string {
   switch (s) {
-    case "DELIVERED": return "stamp-go";
-    case "FAILED": case "CANCELLED": return "stamp-stop";
-    case "PLACED": case "RESCHEDULED": return "stamp-hold";
-    default: return "stamp-signal"; // ASSIGNED, PICKED_UP, IN_TRANSIT, OUT_FOR_DELIVERY
+    case "DELIVERED": return "status-done";
+    case "FAILED": case "CANCELLED": return "status-failed";
+    case "PLACED": case "RESCHEDULED": return "status-hold";
+    default: return "status-live"; // ASSIGNED, PICKED_UP, IN_TRANSIT, OUT_FOR_DELIVERY
   }
 }
 

@@ -66,7 +66,7 @@ export default function PricingAdmin() {
             >
               <div className="flex items-center justify-between mb-3">
                 <Micro>COD surcharge · {t}</Micro>
-                <span className={`stamp ${row?.active ? "stamp-go" : "stamp-ink"}`}>{row?.active ? "Active" : "Unset"}</span>
+                <span className={`status ${row?.active ? "status-done" : "status-neutral"}`}>{row?.active ? "Active" : "Unset"}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Percent of COD value"><input className="field" type="number" step="0.01" min="0" required value={cf.percent} onChange={(e) => setCodForm({ ...codForm, [t]: { ...cf, percent: e.target.value } })} /></Field>
@@ -142,7 +142,7 @@ export default function PricingAdmin() {
                   <td className="font-mono tabular-nums">{c.baseWeightKg} kg</td>
                   <td className="font-mono tabular-nums">{fmtMoney(c.basePrice)}</td>
                   <td className="font-mono tabular-nums">{fmtMoney(c.perKgRate)}</td>
-                  <td><span className={`stamp ${c.active ? "stamp-go" : "stamp-ink"}`}>{c.active ? "Active" : "Superseded"}</span></td>
+                  <td><span className={`status ${c.active ? "status-done" : "status-neutral"}`}>{c.active ? "Active" : "Superseded"}</span></td>
                 </tr>
               ))}
             </tbody>

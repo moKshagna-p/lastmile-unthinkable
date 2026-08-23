@@ -105,7 +105,7 @@ export default function OrderTracking() {
           <div className="hidden md:flex flex-col items-center px-4">
             <span className="micro !text-[var(--color-signal)]">{order.orderType} · {order.paymentType}{order.codAmount ? ` · ₹${order.codAmount}` : ""}</span>
             <div className="relative w-28 my-2.5">
-              <div className={`route-dash w-full ${["PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY"].includes(order.status) ? "route-dash-live" : ""}`} />
+              <div className="route-line w-full" />
               {order.status !== "PLACED" && order.status !== "DELIVERED" && (
                 <Truck size={15} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[var(--color-surface)] px-[3px] text-[var(--color-signal-deep)]" />
               )}
@@ -187,7 +187,7 @@ export default function OrderTracking() {
             <Row k="Actual weight" v={fmtKg(order.actualWeightKg)} />
             <Row k="Volumetric weight" v={fmtKg(order.volumetricWeightKg)} />
             <Row k="Billable weight" v={fmtKg(order.billableWeightKg)} strong />
-            <div className="route-dash my-2" />
+            <div className="route-line my-2" />
             <Row k="Freight" v={fmtMoney(order.freightCharge)} />
             <Row k="COD surcharge" v={fmtMoney(order.codSurcharge)} />
           </dl>

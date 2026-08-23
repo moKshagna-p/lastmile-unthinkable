@@ -14,7 +14,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body style={{ background: "#f0f1ec", color: "#0a0b0a", fontFamily: "Arial, sans-serif" }}>
-        <main style={{ minHeight: "100vh", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+        <main style={{ minHeight: "100vh", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))" }}>
           <div style={{ display: "grid", placeItems: "center", background: "#0a0b0a", color: "#38ff62", fontSize: "clamp(80px, 18vw, 240px)", fontWeight: 900, letterSpacing: "-0.08em" }}>500</div>
           <div
             style={{
