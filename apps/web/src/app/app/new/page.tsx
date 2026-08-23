@@ -7,6 +7,7 @@ import { Shell } from "@/components/shell";
 import { ErrorNote, Field, Micro } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtKg, fmtMoney } from "@/lib/format";
+import { orderStepForScroll, type OrderStep } from "@/lib/ui-state";
 import type { ChargeBreakdown } from "@lastmile/shared";
 
 interface AreaRow {
@@ -49,6 +50,7 @@ export default function NewOrder() {
   const [quoting, setQuoting] = useState(false);
   const [submitErr, setSubmitErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [activeStep, setActiveStep] = useState<OrderStep>("route");
 
   const areas = areaData?.areas ?? [];
   const pickupArea = areas.find((a) => a.id === form.pickupAreaId);
@@ -64,6 +66,31 @@ export default function NewOrder() {
     }
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [areas]);
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const packageSection = document.getElementById("step-package");
+        const confirmSection = document.getElementById("step-confirm");
+        if (!packageSection || !confirmSection) return;
+        const stacked = window.matchMedia("(max-width: 1023px)").matches;
+        setActiveStep(orderStepForScroll({
+          packageTop: packageSection.getBoundingClientRect().top,
+          confirmTop: stacked ? confirmSection.getBoundingClientRect().top : null,
+        }));
+      });
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   // ── Live quote — debounced recalculation as inputs change ─────────────────
   const quoteKey = useMemo(
@@ -115,8 +142,8 @@ export default function NewOrder() {
 
   // ── Completion state for step chips ───────────────────────────────────────
   const routeDone = [form.pickupAreaId, form.dropAreaId, form.pickupName, form.pickupPhone, form.pickupLine1, form.dropName, form.dropPhone, form.dropLine1].every(Boolean);
-  const packageDone = weightReady;
-  const confirmDone = !!quote;
+  const packageDone = routeDone && weightReady;
+  const confirmDone = packageDone && !!quote;
 
   function swapEnds() {
     setForm((f) => ({
@@ -163,19 +190,19 @@ export default function NewOrder() {
           <p className="micro">Customer shipping</p>
           <h1>New shipment.</h1>
         </div>
-        <ol className="flex flex-wrap gap-2 mt-3" aria-label="Progress">
-          <StepChip n="01" label="Route" done={routeDone} target="step-route" />
-          <StepChip n="02" label="Package & payment" done={packageDone} target="step-package" />
-          <StepChip n="03" label="Confirm" done={confirmDone} target="step-confirm" />
-        </ol>
       </header>
+      <ol className="order-progress" aria-label="Shipment progress">
+        <StepChip n="01" label="Route" active={activeStep === "route"} done={routeDone} target="step-route" onActivate={() => setActiveStep("route")} />
+        <StepChip n="02" label="Package & payment" active={activeStep === "package"} done={packageDone} target="step-package" onActivate={() => setActiveStep("package")} />
+        <StepChip n="03" label="Confirm" active={activeStep === "confirm"} done={confirmDone} target="step-confirm" onActivate={() => setActiveStep("confirm")} />
+      </ol>
 
       <form id="new-order-form" onSubmit={submit} className="order-builder">
         <div className="order-fields">
           {submitErr && <ErrorNote error={submitErr} />}
 
           {/* ── 01 · Route ──────────────────────────────────────────────── */}
-          <section id="step-route" className="order-section scroll-mt-20">
+          <section id="step-route" className="order-section order-anchor">
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
                 <Micro>01 · Route</Micro>
@@ -264,7 +291,7 @@ export default function NewOrder() {
           </section>
 
           {/* ── 02 · Package & payment ──────────────────────────────────── */}
-          <section id="step-package" className="order-section scroll-mt-20">
+          <section id="step-package" className="order-section order-anchor">
             <Micro>02 · Package &amp; payment</Micro>
             <h2 className="font-display font-bold text-lg mt-1 mb-4">What are we shipping?</h2>
 
@@ -346,7 +373,7 @@ export default function NewOrder() {
         </div>
 
         {/* ── 03 · Live quote ─────────────────────────────────────────── */}
-        <aside id="step-confirm" className="quote-panel scroll-mt-20">
+        <aside id="step-confirm" className="quote-panel order-anchor">
           <div className="quote-card">
             <div className="flex items-center justify-between border-b border-[var(--color-ink)] pb-3">
               <Micro>03 · Live quote · rate engine</Micro>
@@ -428,17 +455,25 @@ export default function NewOrder() {
 
 /* ── Pieces ──────────────────────────────────────────────────────────────── */
 
-function StepChip({ n, label, done, target }: { n: string; label: string; done: boolean; target: string }) {
+function StepChip({ n, label, active, done, target, onActivate }: { n: string; label: string; active: boolean; done: boolean; target: string; onActivate: () => void }) {
   return (
     <li>
       <button
         type="button"
-        onClick={() => document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        onClick={() => {
+          onActivate();
+          if (target !== "step-confirm" || window.matchMedia("(max-width: 1023px)").matches) {
+            document.getElementById(target)?.scrollIntoView({ block: "start" });
+          }
+        }}
         aria-label={`Jump to ${label}`}
+        aria-current={active ? "step" : undefined}
         title={`Jump to ${label}`}
         className={`inline-flex items-center gap-2 border px-2.5 py-1 font-mono text-[10px] tracking-[0.07em] uppercase transition-colors cursor-pointer ${
-          done
+          active
             ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[var(--color-signal-deep)] hover:border-[var(--color-signal-deep)]"
+            : done
+              ? "border-[var(--color-go)] bg-[var(--color-go-wash)] text-[var(--color-go)] hover:border-[var(--color-ink)]"
             : "border-[var(--color-line-2)] text-[var(--color-ink-3)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
         }`}
       >

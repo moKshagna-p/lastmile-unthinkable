@@ -30,7 +30,7 @@
   --font-mono: var(--font-plex-mono), monospace;
 }
 
-html { background: var(--color-canvas); }
+html { background: var(--color-canvas); scroll-behavior: smooth; }
 
 body {
   min-height: 100vh;
@@ -352,6 +352,8 @@ select.field { appearance: auto; padding-right: 0.8rem; }
 .section-head h2 { margin-top: 0.35rem; font-family: var(--font-display); font-size: 1.8rem; letter-spacing: -0.05em; }
 
 .order-builder { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 1.5rem; align-items: start; margin-top: 2rem; }
+.order-progress { position: sticky; top: 64px; z-index: 35; display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 0; background: color-mix(in srgb, var(--color-canvas) 94%, transparent); border-bottom: 1px solid var(--color-rule); backdrop-filter: blur(10px); }
+.order-anchor { scroll-margin-top: 8.5rem; }
 .order-fields { display: grid; gap: 1.25rem; }
 .order-section { padding: clamp(1.25rem, 3vw, 2rem); background: var(--color-surface); border-top: 1px solid var(--color-ink); }
 .weight-check { margin-top: 1rem; padding: 1rem; background: var(--color-subtle); border-left: 4px solid var(--color-signal); }
@@ -470,6 +472,9 @@ select.field { appearance: auto; padding-right: 0.8rem; }
   .shell-top-nav { grid-row: 2; grid-column: 1 / -1; justify-content: start; margin: 0 -1rem; padding: 0 1rem 0.6rem; }
   .shell-account .micro { display: none; }
   .shell-content { padding-top: 1.5rem; }
+  .order-progress { top: 104px; justify-content: flex-start; margin-inline: -1rem; padding-inline: 1rem; overflow-x: auto; }
+  .order-progress > li { flex: 0 0 auto; }
+  .order-anchor { scroll-margin-top: 11rem; }
   .customer-latest { grid-template-columns: 1fr; }
   .customer-latest > div { min-height: 190px; }
   .customer-latest > div:first-child { border-right: 0; border-bottom: 1px solid var(--color-ink); }

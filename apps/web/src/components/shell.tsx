@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Bike, LayoutDashboard, Network, Package, PlusCircle, ReceiptText, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { authClient, type SessionUser } from "@/lib/auth-client";
+import { activeNavHref } from "@/lib/ui-state";
 
 /** Authenticated shell: guards by role, renders top nav, logs out. */
 export function Shell({
@@ -108,10 +109,11 @@ function NavLinks({ role, pathname }: { role: string; pathname: string }) {
             ["My orders", "/app", Package],
             ["New order", "/app/new", PlusCircle],
           ];
+  const activeHref = activeNavHref(pathname, links.map(([, href]) => href));
   return (
     <>
       {links.map(([label, href, Icon]) => {
-        const active = pathname === href || pathname.startsWith(`${href}/`);
+        const active = href === activeHref;
         return (
           <Link
             key={href}
