@@ -35,17 +35,18 @@ export default function AdminOverview() {
 
   const orders = data?.orders ?? [];
   const byStatus = stats?.ordersByStatus ?? {};
+  const inNetwork = (byStatus.ASSIGNED ?? 0) + (byStatus.PICKED_UP ?? 0) + (byStatus.IN_TRANSIT ?? 0) + (byStatus.OUT_FOR_DELIVERY ?? 0);
 
   return (
     <Shell role="ADMIN" title="LastMile · Ops">
-      <div className="rise">
-        <h1 className="font-display font-bold text-3xl tracking-tight">Control tower</h1>
-        <p className="micro mt-1">Every shipment · every zone · every rider</p>
-      </div>
+      <header className="page-head">
+        <div><p className="micro">Admin / live operations</p><h1>Network<br />overview.</h1></div>
+        <span className="micro">Every shipment / zone / rider</span>
+      </header>
 
-      <div className="grid sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6 rise rise-1">
+      <div className="admin-overview-metrics">
+        <div className="admin-primary-stat"><span className="micro">Parcels in network</span><strong>{inNetwork}</strong><small>currently moving</small></div>
         <Stat label="Placed" value={byStatus.PLACED ?? 0} />
-        <Stat label="In network" value={(byStatus.ASSIGNED ?? 0) + (byStatus.PICKED_UP ?? 0) + (byStatus.IN_TRANSIT ?? 0) + (byStatus.OUT_FOR_DELIVERY ?? 0)} />
         <Stat label="Delivered" value={byStatus.DELIVERED ?? 0} />
         <Stat label="Failed" value={byStatus.FAILED ?? 0} />
         <Stat label="Rescheduled" value={byStatus.RESCHEDULED ?? 0} />
@@ -53,7 +54,7 @@ export default function AdminOverview() {
       </div>
 
       {/* Filters */}
-      <div className="card p-4 mt-8 grid sm:grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-3 items-end rise rise-2">
+      <div className="filter-bar">
         <div>
           <Micro>Status</Micro>
           <select className="field mt-1.5" value={status} onChange={(e) => setStatus(e.target.value)}>
@@ -80,7 +81,7 @@ export default function AdminOverview() {
         )}
       </div>
 
-      <div className="card overflow-x-auto mt-4 rise rise-3">
+      <div className="table-wrap mt-4">
         {isLoading ? (
           <Spinner label="Loading orders" />
         ) : error ? (

@@ -49,21 +49,18 @@ export default function NetworkAdmin() {
 
   return (
     <Shell role="ADMIN" title="LastMile · Ops">
-      <div className="rise">
-        <h1 className="font-display font-bold text-3xl tracking-tight">Network</h1>
-        <p className="micro mt-1">Zones and the pincode → zone mapping that drives rate detection</p>
-      </div>
+      <header className="page-head"><div><p className="micro">Admin / serviceability</p><h1>Network.</h1></div><span className="micro">Pincode → zone → rate</span></header>
 
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
 
-      <div className="grid lg:grid-cols-2 gap-6 mt-6 items-start">
+      <div className="config-grid">
         {/* Zones */}
-        <section className="card p-6 rise rise-1">
+        <section className="config-panel">
           <Micro>Service zones</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-4">Zones</h2>
           <div className="space-y-2">
             {zones.isLoading ? <Spinner /> : zones.data?.zones.map((z) => (
-              <div key={z.id} className="flex items-center justify-between border border-[var(--color-line)] rounded px-4 py-3 bg-[#fffdf8]">
+              <div key={z.id} className="config-row">
                 <div>
                   <p className="font-medium">{z.name} <span className="font-mono text-xs text-[var(--color-ink-3)]">/{z.code}</span></p>
                   <Micro className="mt-0.5">{z.areaCount} pincode area{z.areaCount === 1 ? "" : "s"}{z.description ? ` · ${z.description}` : ""}</Micro>
@@ -79,7 +76,7 @@ export default function NetworkAdmin() {
             ))}
           </div>
           <form
-            className="mt-5 border-t border-dashed border-[var(--color-line-2)] pt-5 grid grid-cols-[1fr_90px_auto] gap-3 items-end"
+            className="inline-form grid-cols-[1fr_90px_auto]"
             onSubmit={(e) => {
               e.preventDefault();
               act(() => api("/admin/zones", { method: "POST", body: zoneForm })).then(() => setZoneForm({ name: "", code: "", description: "" }));
@@ -92,12 +89,12 @@ export default function NetworkAdmin() {
         </section>
 
         {/* Areas */}
-        <section className="card p-6 rise rise-2">
+        <section className="config-panel">
           <Micro>Pincode mapping · one pincode = one zone</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-4">Areas</h2>
           <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
             {areas.isLoading ? <Spinner /> : areas.data?.areas.map((a) => (
-              <div key={a.id} className="flex items-center justify-between border border-[var(--color-line)] rounded px-4 py-2.5 bg-[#fffdf8] text-sm">
+              <div key={a.id} className="config-row text-sm">
                 <div>
                   <span className="font-mono font-semibold">{a.pincode}</span> · {a.name}
                   <span className="micro ml-2">{a.zoneName}</span>
@@ -113,7 +110,7 @@ export default function NetworkAdmin() {
             ))}
           </div>
           <form
-            className="mt-5 border-t border-dashed border-[var(--color-line-2)] pt-5 grid grid-cols-2 gap-3 items-end"
+            className="inline-form grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
               act(() => api("/admin/areas", {

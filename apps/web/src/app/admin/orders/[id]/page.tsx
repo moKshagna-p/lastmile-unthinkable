@@ -53,29 +53,29 @@ export default function AdminOrder() {
 
   return (
     <Shell role="ADMIN" title="LastMile · Ops">
-      <div className="flex flex-wrap items-start justify-between gap-4 rise">
+      <header className="page-head">
         <div>
           <p className="micro">Waybill</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight font-mono">{order.code}</h1>
+          <h1 className="!font-mono">{order.code}</h1>
           <p className="micro mt-1">{order.orderType} · {order.paymentType} · placed {fmtDate(order.createdAt)}</p>
         </div>
         <Stamp status={order.status} />
-      </div>
+      </header>
 
-      <section className="card p-6 mt-6 rise rise-1">
+      <section className="tracking-progress">
         <Stepper status={order.status} />
       </section>
 
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
 
-      <div className="grid lg:grid-cols-[1fr_1fr] gap-6 mt-6 items-start">
+      <div className="admin-order-grid">
         {/* Dispatch panel */}
-        <section className="card p-6 rise rise-1 space-y-6">
+        <section className="config-panel space-y-6">
           <div>
             <Micro>Dispatch</Micro>
             <h2 className="font-display font-bold text-lg mt-1 mb-3">Agent assignment</h2>
             {agent ? (
-              <div className="border border-[var(--color-line)] bg-[var(--color-paper-2)] rounded p-4 flex items-center justify-between">
+              <div className="config-row">
                 <div>
                   <p className="font-medium">{agent.name} · <span className="font-mono">{agent.code}</span></p>
                   <Micro className="mt-0.5">Currently assigned</Micro>
@@ -109,7 +109,7 @@ export default function AdminOrder() {
             </div>
           </div>
 
-          <div className="border-t border-dashed border-[var(--color-line-2)] pt-5">
+          <div className="border-t border-[var(--color-rule)] pt-5">
             <Micro>Override</Micro>
             <h2 className="font-display font-bold text-lg mt-1 mb-3">Force status</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -133,7 +133,7 @@ export default function AdminOrder() {
             <p className="micro mt-2 leading-relaxed">Overrides are legal but logged as such in the tracking ledger.</p>
           </div>
 
-          <div className="border-t border-dashed border-[var(--color-line-2)] pt-5 text-sm space-y-1.5">
+          <div className="border-t border-[var(--color-rule)] pt-5 text-sm space-y-1.5">
             <Row k="Consignee" v={`${order.dropContactName} — ${order.dropLine1}`} />
             <Row k="Billable weight" v={fmtKg(order.billableWeightKg)} />
             <Row k="Freight + COD" v={`${fmtMoney(order.freightCharge)} + ${fmtMoney(order.codSurcharge)}`} />
@@ -142,7 +142,7 @@ export default function AdminOrder() {
         </section>
 
         {/* Ledger */}
-        <section className="card p-6 rise rise-2">
+        <section className="admin-ledger">
           <Micro>Tracking ledger · append-only</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-6">History</h2>
           <ol>

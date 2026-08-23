@@ -43,22 +43,19 @@ export default function PricingAdmin() {
 
   return (
     <Shell role="ADMIN" title="LastMile · Ops">
-      <div className="rise">
-        <h1 className="font-display font-bold text-3xl tracking-tight">Pricing</h1>
-        <p className="micro mt-1">Rate cards per zone pair × order type · COD surcharge config — the engine reads only this</p>
-      </div>
+      <header className="page-head"><div><p className="micro">Admin / rate engine</p><h1>Pricing.</h1></div><span className="micro">Zone pair × order type</span></header>
 
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
 
       {/* COD surcharges */}
-      <div className="grid sm:grid-cols-2 gap-4 mt-6 rise rise-1">
+      <div className="config-grid">
         {["B2B", "B2C"].map((t) => {
           const row = cod.data?.codSurcharges.find((c) => c.orderType === t);
           const cf = codForm[t] ?? { percent: String(row?.percent ?? ""), flatFee: String(row?.flatFee ?? "") };
           return (
             <form
               key={t}
-              className="card p-5"
+              className="config-panel"
               onSubmit={(e) => {
                 e.preventDefault();
                 act(() => api(`/admin/cod-surcharges/${t}`, {
@@ -82,7 +79,7 @@ export default function PricingAdmin() {
       </div>
 
       {/* New rate card */}
-      <section className="card p-6 mt-6 rise rise-2">
+      <section className="config-panel mt-6">
         <Micro>New / supersede rate card</Micro>
         <h2 className="font-display font-bold text-lg mt-1 mb-4">Add rate card</h2>
         <form
@@ -125,7 +122,7 @@ export default function PricingAdmin() {
       </section>
 
       {/* Cards table */}
-      <section className="card overflow-x-auto mt-6 rise rise-3">
+      <section className="table-wrap mt-6">
         <div className="flex items-center justify-between px-5 pt-4">
           <Micro>Rate matrix · {shown.length} cards</Micro>
           <div className="flex gap-1">

@@ -41,12 +41,9 @@ export default function AgentsAdmin() {
 
   return (
     <Shell role="ADMIN" title="LastMile · Ops">
-      <div className="rise">
-        <h1 className="font-display font-bold text-3xl tracking-tight">Fleet</h1>
-        <p className="micro mt-1">Riders, availability and live load — the inputs to auto-assignment</p>
-      </div>
+      <header className="page-head"><div><p className="micro">Admin / field network</p><h1>Fleet.</h1></div><span className="micro">Availability / capacity / position</span></header>
 
-      <div className="grid sm:grid-cols-3 gap-4 mt-6 rise rise-1">
+      <div className="grid sm:grid-cols-3 gap-px mt-6 bg-[var(--color-rule)]">
         <Stat label="Riders" value={rows.length} />
         <Stat label="On duty" value={rows.filter((a) => a.status === "AVAILABLE").length} />
         <Stat label="Parcels in field" value={rows.reduce((s, a) => s + a.activeLoad, 0)} />
@@ -55,7 +52,7 @@ export default function AgentsAdmin() {
       {err && <div className="mt-4"><ErrorNote error={err} /></div>}
 
       {/* Add agent */}
-      <section className="card p-6 mt-6 rise rise-2">
+      <section className="config-panel mt-6">
         <Micro>Onboard rider</Micro>
         <h2 className="font-display font-bold text-lg mt-1 mb-4">New agent account</h2>
         <form
@@ -95,7 +92,7 @@ export default function AgentsAdmin() {
       </section>
 
       {/* Fleet table */}
-      <section className="card overflow-x-auto mt-6 rise rise-3">
+      <section className="table-wrap mt-6">
         {agents.isLoading ? <Spinner /> : (
           <table className="tbl">
             <thead><tr><th>Code</th><th>Rider</th><th>Zone</th><th>Position</th><th>Load</th><th>Status</th><th>Duty</th></tr></thead>
