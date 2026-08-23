@@ -30,7 +30,16 @@ export function Shell({
     }
   }, [isPending, user, role, router]);
 
-  if (isPending || !user) return null;
+  if (isPending || !user) {
+    return (
+      <div className="min-h-screen grid place-items-center" role="status" aria-live="polite">
+        <div className="text-center">
+          <span className="inline-block w-6 h-6 border-2 border-[var(--color-line-2)] border-t-[var(--color-ink)] rounded-full animate-spin" aria-hidden />
+          <p className="micro mt-3">Restoring session…</p>
+        </div>
+      </div>
+    );
+  }
 
   async function logout() {
     try {

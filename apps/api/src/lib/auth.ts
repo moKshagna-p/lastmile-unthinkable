@@ -37,6 +37,17 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // refresh once a day
+    /**
+     * Cache the session inside the signed session cookie for 5 minutes:
+     * getSession() (run by attachUser on every request) stops hitting
+     * Postgres for user + session rows while the cookie is fresh.
+     * Trade-off: role/status changes take up to 5 min to propagate — fine
+     * for this app; sign-out still clears immediately server-side.
+     */
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
   },
   user: {
     additionalFields: {
@@ -55,6 +66,10 @@ export interface AuthUser {
 
 /** Resolves the Better Auth session onto the Hono context (once per request). */
 export async function attachUser(c: Context, next: Next) {
+  // No session cookie at all → no session to resolve. Skip the DB entirely
+  // for public/cold requests instead of paying a guaranteed-miss lookup.
+  const cookie = c.req.header("cookie") ?? "";
+  if (!cookie.includes("session_token")) return next();
   try {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (session?.user) c.set("user", session.user);
