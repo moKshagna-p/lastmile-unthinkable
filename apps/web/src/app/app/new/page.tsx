@@ -3,12 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import AddressAutocomplete from "@/components/address-autocomplete";
 import { Shell } from "@/components/shell";
 import { ErrorNote, Field, Micro } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtKg, fmtMoney } from "@/lib/format";
-import type { PlaceSelection } from "@/lib/geocode";
 import type { ChargeBreakdown } from "@lastmile/shared";
 
 interface AreaRow {
@@ -51,33 +49,10 @@ export default function NewOrder() {
   const [quoting, setQuoting] = useState(false);
   const [submitErr, setSubmitErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  /** Non-serviceable pincode warnings, keyed per end of the route. */
-  const [areaWarns, setAreaWarns] = useState<{ pickup: string | null; drop: string | null }>({ pickup: null, drop: null });
 
   const areas = areaData?.areas ?? [];
   const pickupArea = areas.find((a) => a.id === form.pickupAreaId);
   const dropArea = areas.find((a) => a.id === form.dropAreaId);
-
-  // ── Google address pick → fill line1 + auto-match area by pincode ─────────
-  function applyPlace(end: "pickup" | "drop", sel: PlaceSelection) {
-    const match = sel.pincode ? areas.find((a) => a.pincode === sel.pincode) : undefined;
-    const warn = match
-      ? null
-      : sel.pincode
-        ? `We don't serve ${sel.pincode} yet — try another nearby address or pick the area manually.`
-        : "No pincode detected for that address — pick an area manually below.";
-    if (end === "pickup") {
-      setForm((f) => ({ ...f, pickupLine1: sel.line1, pickupAreaId: match?.id ?? "" }));
-      setAreaWarns((w) => ({ ...w, pickup: warn }));
-    } else {
-      setForm((f) => ({ ...f, dropLine1: sel.line1, dropAreaId: match?.id ?? "" }));
-      setAreaWarns((w) => ({ ...w, drop: warn }));
-    }
-  }
-
-  function clearWarn(end: "pickup" | "drop") {
-    setAreaWarns((w) => ({ ...w, [end]: null }));
-  }
 
   // Areas grouped by zone for scannable dropdowns
   const zoneGroups = useMemo(() => {
@@ -151,7 +126,6 @@ export default function NewOrder() {
       pickupPhone: f.dropPhone, dropPhone: f.pickupPhone,
       pickupLine1: f.dropLine1, dropLine1: f.pickupLine1,
     }));
-    setAreaWarns((w) => ({ pickup: w.drop, drop: w.pickup }));
   }
 
   async function submit(e: React.FormEvent) {
@@ -226,36 +200,10 @@ export default function NewOrder() {
                 <Field label="Contact phone">
                   <input className="field" type="tel" required autoComplete="tel" value={form.pickupPhone} onChange={(e) => setForm({ ...form, pickupPhone: e.target.value })} placeholder="+91…" />
                 </Field>
-                <AddressAutocomplete
-                  id="pickup-address"
-                  label="Pickup address"
-                  required
-                  value={form.pickupLine1}
-                  onValueChange={(v) => setForm({ ...form, pickupLine1: v })}
-                  onSelect={(sel) => applyPlace("pickup", sel)}
-                  placeholder="Type a street, area or landmark…"
-                />
-                {pickupArea ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="status status-done">{pickupArea.zoneName}</span>
-                    <Micro className="normal-case tracking-normal">Serving {pickupArea.name} · {pickupArea.pincode}</Micro>
-                  </div>
-                ) : areaWarns.pickup ? (
-                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-subtle)]">
-                    ⚠ {areaWarns.pickup}
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-[var(--color-ink-3)] leading-relaxed">
-                    Pick a suggestion — we resolve your serviceable area from its pincode.
-                  </p>
-                )}
-                <details>
-                  <summary className="cursor-pointer select-none w-fit font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-ink-3)] hover:text-[var(--color-ink)] transition-colors">
-                    Or choose area manually
-                  </summary>
-                  <Field label="Serviceable area">
-                    <select className="field mt-2" value={form.pickupAreaId} onChange={(e) => { setForm({ ...form, pickupAreaId: e.target.value }); clearWarn("pickup"); }}>
-                      <option value="">Select area…</option>
+                <div className="border border-[var(--color-ink)] bg-[var(--color-subtle)] p-3">
+                  <Field label="Serviceable pickup location">
+                    <select id="pickup-area" className="field mt-2 !bg-[var(--color-surface)]" required value={form.pickupAreaId} onChange={(e) => setForm({ ...form, pickupAreaId: e.target.value })}>
+                      <option value="">Choose pickup location…</option>
                       {zoneGroups.map(([zone, g]) => (
                         <optgroup key={zone} label={`${zone} · ${g.city}`}>
                           {g.areas.map((a) => (
@@ -265,7 +213,16 @@ export default function NewOrder() {
                       ))}
                     </select>
                   </Field>
-                </details>
+                  {pickupArea && (
+                    <div className="flex items-center justify-between gap-2 flex-wrap mt-3 pt-3 border-t border-[var(--color-rule)]">
+                      <span className="status status-done">In network</span>
+                      <Micro className="normal-case tracking-normal">{pickupArea.zoneName} · {pickupArea.pincode}</Micro>
+                    </div>
+                  )}
+                </div>
+                <Field label="Street / building / landmark">
+                  <input id="pickup-address" className="field" required autoComplete="street-address" value={form.pickupLine1} onChange={(e) => setForm({ ...form, pickupLine1: e.target.value })} placeholder="Exact collection address" />
+                </Field>
               </fieldset>
 
               <fieldset className="space-y-4 min-w-0">
@@ -279,36 +236,10 @@ export default function NewOrder() {
                 <Field label="Contact phone">
                   <input className="field" type="tel" required value={form.dropPhone} onChange={(e) => setForm({ ...form, dropPhone: e.target.value })} placeholder="+91…" />
                 </Field>
-                <AddressAutocomplete
-                  id="drop-address"
-                  label="Drop address"
-                  required
-                  value={form.dropLine1}
-                  onValueChange={(v) => setForm({ ...form, dropLine1: v })}
-                  onSelect={(sel) => applyPlace("drop", sel)}
-                  placeholder="Type a street, area or landmark…"
-                />
-                {dropArea ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="status status-done">{dropArea.zoneName}</span>
-                    <Micro className="normal-case tracking-normal">Serving {dropArea.name} · {dropArea.pincode}</Micro>
-                  </div>
-                ) : areaWarns.drop ? (
-                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-subtle)]">
-                    ⚠ {areaWarns.drop}
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-[var(--color-ink-3)] leading-relaxed">
-                    Pick a suggestion — we resolve your serviceable area from its pincode.
-                  </p>
-                )}
-                <details>
-                  <summary className="cursor-pointer select-none w-fit font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-ink-3)] hover:text-[var(--color-ink)] transition-colors">
-                    Or choose area manually
-                  </summary>
-                  <Field label="Serviceable area">
-                    <select className="field mt-2" value={form.dropAreaId} onChange={(e) => { setForm({ ...form, dropAreaId: e.target.value }); clearWarn("drop"); }}>
-                      <option value="">Select area…</option>
+                <div className="border border-[var(--color-ink)] bg-[var(--color-subtle)] p-3">
+                  <Field label="Serviceable drop location">
+                    <select id="drop-area" className="field mt-2 !bg-[var(--color-surface)]" required value={form.dropAreaId} onChange={(e) => setForm({ ...form, dropAreaId: e.target.value })}>
+                      <option value="">Choose drop location…</option>
                       {zoneGroups.map(([zone, g]) => (
                         <optgroup key={zone} label={`${zone} · ${g.city}`}>
                           {g.areas.map((a) => (
@@ -318,7 +249,16 @@ export default function NewOrder() {
                       ))}
                     </select>
                   </Field>
-                </details>
+                  {dropArea && (
+                    <div className="flex items-center justify-between gap-2 flex-wrap mt-3 pt-3 border-t border-[var(--color-rule)]">
+                      <span className="status status-done">In network</span>
+                      <Micro className="normal-case tracking-normal">{dropArea.zoneName} · {dropArea.pincode}</Micro>
+                    </div>
+                  )}
+                </div>
+                <Field label="Street / building / landmark">
+                  <input id="drop-address" className="field" required autoComplete="street-address" value={form.dropLine1} onChange={(e) => setForm({ ...form, dropLine1: e.target.value })} placeholder="Exact delivery address" />
+                </Field>
               </fieldset>
             </div>
           </section>
