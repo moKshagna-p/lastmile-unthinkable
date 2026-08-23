@@ -11,3 +11,4 @@ dist
 drizzle/meta
 bun.lock
 *.tsbuildinfo
+.superpowers/
