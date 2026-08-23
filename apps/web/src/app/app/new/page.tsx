@@ -184,21 +184,24 @@ export default function NewOrder() {
 
   return (
     <Shell role="CUSTOMER" title="LastMile">
-      <div className="rise">
-        <h1 className="font-display font-bold text-3xl tracking-tight">New shipment</h1>
+      <header className="page-head order-page-head">
+        <div>
+          <p className="micro">Customer shipping</p>
+          <h1>New shipment.</h1>
+        </div>
         <ol className="flex flex-wrap gap-2 mt-3" aria-label="Progress">
           <StepChip n="01" label="Route" done={routeDone} target="step-route" />
           <StepChip n="02" label="Package & payment" done={packageDone} target="step-package" />
           <StepChip n="03" label="Confirm" done={confirmDone} target="step-confirm" />
         </ol>
-      </div>
+      </header>
 
-      <form id="new-order-form" onSubmit={submit} className="grid lg:grid-cols-[1fr_380px] gap-6 mt-6 items-start">
-        <div className="space-y-5">
+      <form id="new-order-form" onSubmit={submit} className="order-builder">
+        <div className="order-fields">
           {submitErr && <ErrorNote error={submitErr} />}
 
           {/* ── 01 · Route ──────────────────────────────────────────────── */}
-          <section id="step-route" className="card p-6 rise rise-1 scroll-mt-20">
+          <section id="step-route" className="order-section scroll-mt-20">
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
                 <Micro>01 · Route</Micro>
@@ -210,12 +213,11 @@ export default function NewOrder() {
             </div>
 
             <div className="relative grid lg:grid-cols-2 gap-6 lg:gap-12">
-              {/* dashed connector between the two ends */}
-              <span aria-hidden className="hidden lg:block absolute left-1/2 top-2 bottom-2 -translate-x-1/2 border-l-2 border-dashed border-[var(--color-line-2)]" />
+              <span aria-hidden className="hidden lg:block absolute left-1/2 top-2 bottom-2 -translate-x-1/2 border-l border-[var(--color-rule)]" />
 
               <fieldset className="space-y-4 min-w-0">
                 <legend className="flex items-center gap-2 mb-1">
-                  <span className="w-5 h-5 grid place-items-center rounded-full bg-[var(--color-signal)] text-white font-mono text-[10px] font-bold">A</span>
+                  <span className="w-5 h-5 grid place-items-center bg-[var(--color-signal)] text-[var(--color-ink)] font-mono text-[10px] font-bold">A</span>
                   <span className="micro !text-[var(--color-ink-2)]">Collect from</span>
                 </legend>
                 <Field label="Contact name">
@@ -239,7 +241,7 @@ export default function NewOrder() {
                     <Micro className="normal-case tracking-normal">Serving {pickupArea.name} · {pickupArea.pincode}</Micro>
                   </div>
                 ) : areaWarns.pickup ? (
-                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-signal-deep)] border border-dashed border-[var(--color-signal)] rounded-[3px] px-3 py-2 bg-[var(--color-paper-2)]">
+                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-paper-2)]">
                     ⚠ {areaWarns.pickup}
                   </p>
                 ) : (
@@ -268,7 +270,7 @@ export default function NewOrder() {
 
               <fieldset className="space-y-4 min-w-0">
                 <legend className="flex items-center gap-2 mb-1">
-                  <span className="w-5 h-5 grid place-items-center rounded-full border-2 border-[var(--color-ink)] font-mono text-[10px] font-bold">B</span>
+                  <span className="w-5 h-5 grid place-items-center border border-[var(--color-ink)] font-mono text-[10px] font-bold">B</span>
                   <span className="micro !text-[var(--color-ink-2)]">Deliver to</span>
                 </legend>
                 <Field label="Contact name">
@@ -292,7 +294,7 @@ export default function NewOrder() {
                     <Micro className="normal-case tracking-normal">Serving {dropArea.name} · {dropArea.pincode}</Micro>
                   </div>
                 ) : areaWarns.drop ? (
-                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-signal-deep)] border border-dashed border-[var(--color-signal)] rounded-[3px] px-3 py-2 bg-[var(--color-paper-2)]">
+                  <p role="alert" className="text-[11px] leading-relaxed text-[var(--color-ink)] border-l-4 border-[var(--color-signal)] px-3 py-2 bg-[var(--color-paper-2)]">
                     ⚠ {areaWarns.drop}
                   </p>
                 ) : (
@@ -322,7 +324,7 @@ export default function NewOrder() {
           </section>
 
           {/* ── 02 · Package & payment ──────────────────────────────────── */}
-          <section id="step-package" className="card p-6 rise rise-2 scroll-mt-20">
+          <section id="step-package" className="order-section scroll-mt-20">
             <Micro>02 · Package &amp; payment</Micro>
             <h2 className="font-display font-bold text-lg mt-1 mb-4">What are we shipping?</h2>
 
@@ -336,7 +338,7 @@ export default function NewOrder() {
                     key={p.label}
                     type="button"
                     onClick={() => setForm({ ...form, lengthCm: p.lengthCm, breadthCm: p.breadthCm, heightCm: p.heightCm, actualWeightKg: p.actualWeightKg })}
-                    className={`font-mono text-[11px] tracking-[0.08em] uppercase px-3 py-1.5 rounded-[3px] border transition-colors ${
+                    className={`font-mono text-[11px] tracking-[0.06em] uppercase px-3 py-1.5 border transition-colors ${
                       active
                         ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
                         : "border-[var(--color-line-2)] text-[var(--color-ink-2)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
@@ -357,7 +359,7 @@ export default function NewOrder() {
 
             {/* Instant weight explainer — same ÷5000 rule as the engine */}
             {weightReady && (
-              <div className="mt-4 border border-[var(--color-line)] bg-[var(--color-paper-2)] rounded-[3px] p-4">
+              <div className="weight-check">
                 <div className="flex items-center justify-between gap-3">
                   <Micro>Weight check · L×B×H ÷ {VOL_DIVISOR}</Micro>
                   <span className={`stamp ${billedOnVol ? "stamp-signal" : "stamp-go"}`}>
@@ -404,9 +406,9 @@ export default function NewOrder() {
         </div>
 
         {/* ── 03 · Live quote ─────────────────────────────────────────── */}
-        <aside id="step-confirm" className="lg:sticky lg:top-20 space-y-4 rise rise-3 scroll-mt-20">
-          <div className="card p-6">
-            <div className="flex items-center justify-between border-b border-dashed border-[var(--color-line-2)] pb-3">
+        <aside id="step-confirm" className="quote-panel scroll-mt-20">
+          <div className="quote-card">
+            <div className="flex items-center justify-between border-b border-[var(--color-ink)] pb-3">
               <Micro>03 · Live quote · rate engine</Micro>
               {quoting && <span className="w-3.5 h-3.5 border-2 border-[var(--color-signal)] border-t-transparent rounded-full animate-spin" />}
             </div>
@@ -427,7 +429,7 @@ export default function NewOrder() {
                 )}
 
                 {/* Billable weight story */}
-                <div className="py-4 border-b border-dashed border-[var(--color-line-2)]">
+                <div className="py-4 border-b border-[var(--color-rule)]">
                   <div className="flex items-baseline justify-between">
                     <Micro>Billable weight</Micro>
                     <span className="micro normal-case tracking-normal">rounded up to ½ kg</span>
@@ -454,9 +456,9 @@ export default function NewOrder() {
                   <Row k="Freight" v={fmtMoney(quote.freightCharge)} strong />
                   {quote.codSurcharge > 0 && <Row k="COD surcharge" v={fmtMoney(quote.codSurcharge)} />}
                 </dl>
-                <div className="border-t-2 border-[var(--color-ink)] pt-3 flex items-baseline justify-between">
-                  <span className="micro !text-[var(--color-signal)]">Total charge</span>
-                  <span className="font-mono font-semibold text-2xl text-[var(--color-signal)] tabular-nums">{fmtMoney(quote.totalCharge)}</span>
+                <div className="quote-total">
+                  <span className="micro">Total charge</span>
+                  <span>{fmtMoney(quote.totalCharge)}</span>
                 </div>
               </>
             ) : null}
@@ -470,7 +472,7 @@ export default function NewOrder() {
       </form>
 
       {/* Mobile sticky confirm bar */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[var(--color-line)] bg-[#fffdf8]/95 backdrop-blur px-4 py-3 flex items-center gap-3">
+      <div className="mobile-confirm">
         <div className="min-w-0">
           <Micro>Total</Micro>
           <div className="font-mono font-semibold text-lg tabular-nums leading-tight">{quote ? fmtMoney(quote.totalCharge) : "—"}</div>
@@ -494,7 +496,7 @@ function StepChip({ n, label, done, target }: { n: string; label: string; done: 
         onClick={() => document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" })}
         aria-label={`Jump to ${label}`}
         title={`Jump to ${label}`}
-        className={`inline-flex items-center gap-2 rounded-[3px] border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors cursor-pointer ${
+        className={`inline-flex items-center gap-2 border px-2.5 py-1 font-mono text-[10px] tracking-[0.07em] uppercase transition-colors cursor-pointer ${
           done
             ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[var(--color-signal-deep)] hover:border-[var(--color-signal-deep)]"
             : "border-[var(--color-line-2)] text-[var(--color-ink-3)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
@@ -513,7 +515,7 @@ function Segmented({
   value, onChange, options,
 }: { value: string; onChange: (v: string) => void; options: [string, string][] }) {
   return (
-    <div className="grid grid-cols-2 gap-1 p-1 rounded-[3px] border border-[var(--color-line-2)] bg-[var(--color-paper-2)]" role="radiogroup">
+    <div className="grid grid-cols-2 gap-1 p-1 border border-[var(--color-rule)] bg-[var(--color-paper-2)]" role="radiogroup">
       {options.map(([v, label]) => (
         <button
           key={v}
@@ -521,7 +523,7 @@ function Segmented({
           role="radio"
           aria-checked={value === v}
           onClick={() => onChange(v)}
-          className={`px-2 py-1.5 rounded-[2px] font-mono text-[11px] tracking-[0.06em] uppercase transition-colors ${
+          className={`px-2 py-1.5 font-mono text-[11px] tracking-[0.06em] uppercase transition-colors ${
             value === v
               ? "bg-[var(--color-ink)] text-[var(--color-paper)]"
               : "text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
@@ -542,9 +544,9 @@ function WeightBar({ label, kg, max, winner }: { label: string; kg: number; max:
       <span className={`font-mono text-[10.5px] tracking-[0.1em] uppercase w-20 shrink-0 ${winner ? "text-[var(--color-ink)]" : "text-[var(--color-ink-3)]"}`}>
         {label}
       </span>
-      <span className="flex-1 h-2 rounded-full bg-[var(--color-paper-2)] overflow-hidden">
+      <span className="flex-1 h-2 bg-[var(--color-paper-2)] overflow-hidden">
         <span
-          className={`block h-full rounded-full transition-all duration-300 ${winner ? "bg-[var(--color-signal)]" : "bg-[var(--color-line-2)]"}`}
+          className={`block h-full transition-all duration-300 ${winner ? "bg-[var(--color-signal)]" : "bg-[var(--color-line-2)]"}`}
           style={{ width: `${pct}%` }}
         />
       </span>

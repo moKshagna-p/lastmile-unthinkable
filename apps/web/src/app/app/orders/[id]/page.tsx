@@ -68,10 +68,10 @@ export default function OrderTracking() {
 
   return (
     <Shell role="ANY" title="LastMile">
-      <div className="flex flex-wrap items-start justify-between gap-4 rise">
+      <header className="page-head tracking-head">
         <div>
           <p className="micro">Waybill</p>
-          <h1 className="font-display font-bold text-3xl tracking-tight font-mono">{order.code}</h1>
+          <h1 className="!font-mono">{order.code}</h1>
         </div>
         <div className="flex items-center gap-3">
           <Stamp status={order.status} />
@@ -81,10 +81,10 @@ export default function OrderTracking() {
             </button>
           )}
         </div>
-      </div>
+      </header>
 
       {/* Lifecycle stepper — where is my parcel? */}
-      <section className="card p-6 mt-6 rise rise-1">
+      <section className="tracking-progress">
         <Stepper status={order.status} />
         {order.status === "FAILED" && order.rescheduleFor && (
           <p className="micro mt-4 text-center flex items-center justify-center gap-1.5">
@@ -94,7 +94,7 @@ export default function OrderTracking() {
       </section>
 
       {/* Route strip */}
-      <section className="card p-6 mt-4 rise rise-1">
+      <section className="tracking-route">
         <div className="grid md:grid-cols-[1fr_auto_1fr] gap-5 items-center">
           <div>
             <Micro>Pickup · {pickupArea?.pincode}</Micro>
@@ -107,10 +107,10 @@ export default function OrderTracking() {
             <div className="relative w-28 my-2.5">
               <div className={`route-dash w-full ${["PICKED_UP", "IN_TRANSIT", "OUT_FOR_DELIVERY"].includes(order.status) ? "route-dash-live" : ""}`} />
               {order.status !== "PLACED" && order.status !== "DELIVERED" && (
-                <Truck size={15} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[#fffdf8] px-[3px] text-[var(--color-signal)]" />
+                <Truck size={15} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[var(--color-surface)] px-[3px] text-[var(--color-signal-deep)]" />
               )}
               {order.status === "DELIVERED" && (
-                <Check size={15} strokeWidth={3} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[#fffdf8] px-[3px] text-[var(--color-go)]" />
+                <Check size={15} strokeWidth={3} className="absolute -top-[8px] left-1/2 -translate-x-1/2 bg-[var(--color-surface)] px-[3px] text-[var(--color-go)]" />
               )}
             </div>
             <span className="micro">{fmtKg(order.billableWeightKg)} billable</span>
@@ -124,14 +124,14 @@ export default function OrderTracking() {
         </div>
 
         {order.status === "FAILED" && (
-          <div className="mt-5 border border-[var(--color-stop)] bg-[var(--color-stop-wash)] rounded p-4 text-sm">
+          <div className="mt-5 border-l-4 border-[var(--color-stop)] bg-[var(--color-stop-wash)] p-4 text-sm">
             <p className="font-semibold text-[var(--color-stop)]">Delivery attempt failed</p>
             <p className="text-[var(--color-ink-2)] mt-0.5">{order.failureReason ?? "No reason recorded."}</p>
             <p className="text-[var(--color-ink-2)] mt-1">Pick a new date — a fresh agent will be assigned automatically for the retry.</p>
           </div>
         )}
         {agent && (
-          <div className="mt-5 border border-[var(--color-line)] bg-[var(--color-paper-2)] rounded p-4 flex items-center justify-between text-sm">
+          <div className="mt-5 border-t border-[var(--color-rule)] pt-4 flex items-center justify-between text-sm">
             <div>
               <Micro>Assigned rider</Micro>
               <p className="font-medium">{agent.name} · <span className="font-mono">{agent.code}</span></p>
@@ -141,9 +141,9 @@ export default function OrderTracking() {
         )}
       </section>
 
-      <div className="grid lg:grid-cols-[1.2fr_1fr] gap-6 mt-6 items-start">
+      <div className="tracking-lower">
         {/* Timeline */}
-        <section className="card p-6 rise rise-2">
+        <section className="tracking-timeline">
           <Micro>Tracking history · immutable</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-6">Journey</h2>
           <ol>
@@ -179,7 +179,7 @@ export default function OrderTracking() {
         </section>
 
         {/* Charges */}
-        <section className="card p-6 rise rise-3">
+        <section className="tracking-invoice">
           <Micro>Charges · rate engine output</Micro>
           <h2 className="font-display font-bold text-lg mt-1 mb-4">Invoice</h2>
           <dl className="space-y-2.5 font-mono text-sm">
@@ -191,17 +191,17 @@ export default function OrderTracking() {
             <Row k="Freight" v={fmtMoney(order.freightCharge)} />
             <Row k="COD surcharge" v={fmtMoney(order.codSurcharge)} />
           </dl>
-          <div className="border-t-2 border-[var(--color-ink)] pt-3 mt-3 flex items-baseline justify-between">
-            <span className="micro !text-[var(--color-signal)]">Total</span>
-            <span className="font-mono font-semibold text-xl text-[var(--color-signal)] tabular-nums">{fmtMoney(order.totalCharge)}</span>
+          <div className="quote-total mt-4">
+            <span className="micro">Total</span>
+            <span>{fmtMoney(order.totalCharge)}</span>
           </div>
         </section>
       </div>
 
       {/* Reschedule modal */}
       {showReschedule && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={() => setShowReschedule(false)}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={reschedule} className="card p-6 w-full max-w-md rise">
+        <div className="modal-backdrop" onClick={() => setShowReschedule(false)}>
+          <form onClick={(e) => e.stopPropagation()} onSubmit={reschedule} className="modal-panel">
             <div className="flex items-center justify-between mb-1">
               <h2 className="font-display font-bold text-xl">Reschedule delivery</h2>
               <button type="button" onClick={() => setShowReschedule(false)} className="text-[var(--color-ink-3)] hover:text-[var(--color-ink)]"><X size={18} /></button>

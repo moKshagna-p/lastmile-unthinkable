@@ -3,7 +3,7 @@
 import useSWR from "swr";
 import Link from "next/link";
 import { Shell } from "@/components/shell";
-import { EmptyState, Stamp, Spinner, Stat } from "@/components/ui";
+import { EmptyState, Stamp, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { fmtDate, fmtMoney } from "@/lib/format";
 import type { OrderStatus } from "@lastmile/shared";
@@ -21,28 +21,39 @@ export default function CustomerHome() {
 
   const orders = data?.orders ?? [];
   const active = orders.filter((o) => !["DELIVERED", "CANCELLED"].includes(o.status));
-  const spend = orders.filter((o) => o.status === "DELIVERED").reduce((s, o) => s + o.totalCharge, 0);
+  const latest = orders[0];
 
   return (
     <Shell role="CUSTOMER" title="LastMile">
-      <div className="rise">
-        <h1 className="font-display font-bold text-3xl tracking-tight">Shipments</h1>
-        <p className="micro mt-1">Your parcels across the network</p>
+      <header className="page-head">
+        <div>
+          <p className="micro">Customer network / {active.length} active</p>
+          <h1>Your shipments.</h1>
+        </div>
+        <Link href="/app/new" className="btn btn-primary">New order +</Link>
+      </header>
+
+      {latest && (
+        <section className="customer-latest">
+          <div>
+            <p className="micro">Latest shipment</p>
+            <h2>{latest.code}</h2>
+            <p>For {latest.dropContactName} · placed {fmtDate(latest.createdAt)}</p>
+          </div>
+          <div className="customer-latest-status">
+            <Stamp status={latest.status} />
+            <strong>{fmtMoney(latest.totalCharge)}</strong>
+            <Link href={`/app/orders/${latest.id}`} className="btn btn-outline">Track shipment</Link>
+          </div>
+        </section>
+      )}
+
+      <div className="section-head">
+        <div><p className="micro">History</p><h2>All orders</h2></div>
+        <span className="micro">{orders.length} total</span>
       </div>
 
-      <div className="grid sm:grid-cols-4 gap-4 mt-6 rise rise-1">
-        <Stat label="Active" value={active.length} />
-        <Stat label="Delivered" value={orders.filter((o) => o.status === "DELIVERED").length} />
-        <Stat label="Total orders" value={orders.length} />
-        <Stat label="Delivered spend" value={fmtMoney(spend)} />
-      </div>
-
-      <div className="flex items-center justify-between mt-10 mb-4 rise rise-2">
-        <h2 className="font-display font-bold text-xl tracking-tight">All orders</h2>
-        <Link href="/app/new" className="btn btn-primary">+ New order</Link>
-      </div>
-
-      <div className="card overflow-x-auto rise rise-3">
+      <div className="table-wrap">
         {isLoading ? (
           <Spinner label="Loading shipments" />
         ) : error ? (
