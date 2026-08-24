@@ -12,7 +12,7 @@ import { API_URL } from "@/lib/api";
  * types don't carry them, so SessionUser is asserted at call sites.
  */
 export const authClient = createAuthClient({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api/auth`,
   fetchOptions: { credentials: "include" },
 });
 
