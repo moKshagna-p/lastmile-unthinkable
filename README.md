@@ -113,10 +113,22 @@ One-click options:
   (API + web + free Postgres). Render → New → Blueprint → pick the repo. Done.
 - **Docker** — `docker build -f apps/api/Dockerfile -t lastmile-api .`
   (migrations run on boot).
-- **Vercel** — import the repo, set root directory to `apps/web`, env
-  `NEXT_PUBLIC_API_URL=https://<your-api-host>`.
+- **Vercel Hobby demo** — create two projects from this repo and a free Neon
+  Postgres database:
+  1. Run migrations and seed once against Neon: `bun run db:migrate && bun run db:seed`.
+  2. API project: root `apps/api`, enable files outside the root, and set
+     `DATABASE_URL`, `BETTER_AUTH_SECRET`,
+     `BETTER_AUTH_URL=https://<web>.vercel.app/backend`, and
+     `WEB_URL=https://<web>.vercel.app`.
+  3. Web project: root `apps/web`, enable files outside the root, and set
+     `API_PROXY_TARGET=https://<api>.vercel.app` plus
+     `NEXT_PUBLIC_API_URL=https://<web>.vercel.app/backend`.
+  4. Verify `https://<web>.vercel.app/backend/health`, then register a user.
+
+  The `/backend` rewrite keeps cookie authentication first-party without a
+  custom domain. If Vercel assigns different URLs, update both projects'
+  variables and redeploy. Hobby is for personal/non-commercial use.
 
 Manual targets: API runs anywhere Bun does (`bun run start` in `apps/api`,
 env: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `WEB_URL`); DB is any Postgres 14+ — run
 `bun run db:migrate && bun run db:seed` once.
-

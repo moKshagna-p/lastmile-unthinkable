@@ -11,6 +11,12 @@ const workspaceRoot = path.resolve(process.cwd(), "../..");
 const nextConfig: NextConfig = {
   transpilePackages: ["@lastmile/shared"],
   outputFileTracingRoot: workspaceRoot,
+  async rewrites() {
+    const api = process.env.API_PROXY_TARGET;
+    return api
+      ? [{ source: "/backend/:path*", destination: `${api}/:path*` }]
+      : [];
+  },
 };
 
 export default nextConfig;

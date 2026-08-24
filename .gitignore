@@ -9,6 +9,5 @@ dist
 .DS_Store
 .turbo
 drizzle/meta
-bun.lock
 *.tsbuildinfo
 .superpowers/

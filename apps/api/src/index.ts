@@ -45,34 +45,38 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-// Bind to the configured port. Before binding, free any stale listener from a
-// previous session — this covers EVERY launch path (bun run dev, the raw
-// `bun --hot src/index.ts`, anything). Production skips cleanup; there, an
-// EADDRINUSE fail-fast remains as the guard: the web app targets this exact
-// URL, so silently hopping ports would leave the frontend calling a dead
-// endpoint.
-const port = env.port;
-if (process.env.NODE_ENV !== "production") await freePort(port);
-const server = (() => {
-  try {
-    return serve({ port, fetch: app.fetch });
-  } catch (err) {
-    const e = err as { code?: string };
-    if (e?.code === "EADDRINUSE") {
-      console.error(`\n✗ Port ${port} still busy after cleanup — inspect: lsof -nP -iTCP:${port} -sTCP:LISTEN\n`);
-      process.exit(1);
-    }
-    throw err;
-  }
-})();
+export default app;
 
-// Graceful shutdown — release the socket cleanly on Ctrl+C / kill so the next
-// boot never has to fight a zombie listener in the first place.
-for (const signal of ["SIGINT", "SIGTERM"] as const) {
-  process.on(signal, () => {
-    console.log(`\n${signal} — shutting down…`);
-    server.stop(true);
-    process.exit(0);
-  });
+if (!process.env.VERCEL) {
+  // Bind to the configured port. Before binding, free any stale listener from a
+  // previous session — this covers EVERY launch path (bun run dev, the raw
+  // `bun --hot src/index.ts`, anything). Production skips cleanup; there, an
+  // EADDRINUSE fail-fast remains as the guard: the web app targets this exact
+  // URL, so silently hopping ports would leave the frontend calling a dead
+  // endpoint.
+  const port = env.port;
+  if (process.env.NODE_ENV !== "production") await freePort(port);
+  const server = (() => {
+    try {
+      return serve({ port, fetch: app.fetch });
+    } catch (err) {
+      const e = err as { code?: string };
+      if (e?.code === "EADDRINUSE") {
+        console.error(`\n✗ Port ${port} still busy after cleanup — inspect: lsof -nP -iTCP:${port} -sTCP:LISTEN\n`);
+        process.exit(1);
+      }
+      throw err;
+    }
+  })();
+
+  // Graceful shutdown — release the socket cleanly on Ctrl+C / kill so the next
+  // boot never has to fight a zombie listener in the first place.
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    process.on(signal, () => {
+      console.log(`\n${signal} — shutting down…`);
+      server.stop(true);
+      process.exit(0);
+    });
+  }
+  console.log(`🚚 LastMile API listening on http://localhost:${port}`);
 }
-console.log(`🚚 LastMile API listening on http://localhost:${port}`);
